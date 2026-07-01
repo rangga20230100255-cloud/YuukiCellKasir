@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riwayat - Yuuki Cell Kasir</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="mobile-app">
+
+    <header class="app-header">
+      <div class="header-top">
+        <a href="index.html" class="icon-btn back-btn">
+          <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </a>
+        <h1>Riwayat</h1>
+        <button id="themeToggle" class="icon-btn theme-btn" aria-label="Toggle Dark Mode">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="datetime-card">
+        <div id="dateDisplay" class="date-text">Memuat...</div>
+        <div id="timeDisplay" class="time-text">--:--:--</div>
+      </div>
+    </header>
+
+    <main class="app-content">
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px;">
+
+        <button id="btnTransaksiBaru" class="menu-btn primary-btn" style="width: 100%;">
+          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Tambah Transaksi
+        </button>
+
+        <button onclick="bukaModalEkspor()" class="menu-btn outline-btn"
+          style="width: 100%; flex-direction: row; gap: 10px; padding: 14px; border-color: var(--border-color);">
+          <svg class="icon" style="width: 20px; height: 20px; margin: 0;" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Ekspor Transaksi Hari Ini
+        </button>
+
+      </div>
+
+      <section class="transaction-history" style="margin-top: 0;">
+        <h3 class="section-title">Semua Transaksi</h3>
+        <div id="transactionList" class="transaction-list">
+        </div>
+      </section>
+    </main>
+
+    <div id="transactionModal" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Input Transaksi</h3>
+        <div class="form-group">
+          <label>Nama Barang</label>
+          <input type="text" id="inputNama" placeholder="Contoh: Pulsa Tsel 50k" autocomplete="off">
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Harga Beli (Modal)</label>
+            <input type="number" id="inputBeli" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Harga Jual</label>
+            <input type="number" id="inputJual" placeholder="0">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="btnBatal" class="modal-btn cancel-btn">Batal</button>
+          <button id="btnTambah" class="modal-btn submit-btn">Tambah</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalEdit" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Edit Transaksi</h3>
+        <input type="hidden" id="editId">
+        <div class="form-group">
+          <label>Nama Barang</label>
+          <input type="text" id="editNama" autocomplete="off">
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Harga Beli</label>
+            <input type="number" id="editBeli">
+          </div>
+          <div class="form-group">
+            <label>Harga Jual</label>
+            <input type="number" id="editJual">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalEdit')">Batal</button>
+          <button class="modal-btn submit-btn" onclick="simpanEdit()">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalHutang" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Catat Hutang</h3>
+        <input type="hidden" id="hutangId">
+        <div class="form-group">
+          <label>Nama Penghutang</label>
+          <input type="text" id="inputNamaHutang" placeholder="Contoh: Budi" autocomplete="off">
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalHutang')">Batal</button>
+          <button class="modal-btn submit-btn" style="background-color: #ff3b30; color: white;"
+            onclick="simpanHutang()">Catat</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalLunas" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Pelunasan Hutang</h3>
+        <input type="hidden" id="lunasId">
+        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">Tandai hutang
+          ini sebagai Lunas?</p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalLunas')">Batal</button>
+          <button class="modal-btn submit-btn" onclick="simpanLunas()">Lunas</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalHapus" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Hapus Transaksi?</h3>
+        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">Yakin ingin
+          menghapus transaksi ini? Data tidak bisa dikembalikan.</p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalHapus')">Batal</button>
+          <button class="modal-btn submit-btn" style="background-color: #ff3b30; color: white;"
+            onclick="konfirmasiHapus()">Hapus</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalEkspor" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Ekspor Data</h3>
+        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">Download data
+          transaksi hari ini ke format Excel (.xls)?</p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalEkspor')">Batal</button>
+          <button class="modal-btn submit-btn" onclick="prosesEkspor()">Download</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="script.js"></script>
+</body>
+
+</html>
