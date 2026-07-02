@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan - Yuuki Cell Kasir</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="mobile-app">
+
+    <header class="app-header">
+      <div class="header-top">
+        <a href="index.html" class="icon-btn back-btn">
+          <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </a>
+        <h1>Laporan Harian</h1>
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle Dark Mode">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="datetime-card">
+        <div id="dateDisplay" class="date-text">Memuat...</div>
+        <div id="timeDisplay" class="time-text">--:--:--</div>
+      </div>
+    </header>
+
+    <main class="app-content">
+      <section class="transaction-history" style="margin-top: 0;">
+        <h3 class="section-title">Rekap Penjualan</h3>
+        <div id="laporanList" class="transaction-list">
+        </div>
+      </section>
+
+      <section style="margin-top: 40px; padding-top: 24px; border-top: 2px dashed var(--border-color);">
+        <h3 class="section-title" style="text-align: center; margin-bottom: 20px;">Total Keseluruhan Laporan</h3>
+
+        <div class="summary-box sale-box" style="margin-bottom: 14px;">
+          <p style="color: #a1a1aa; font-size: 0.75rem; text-transform: uppercase;">Total Penjualan</p>
+          <h2 id="grandTotalJual" style="font-size: 2rem; color: var(--stabilo-green);">Rp 0</h2>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-box capital-box">
+            <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total Modal</p>
+            <h3 id="grandTotalModal" style="font-size: 1.15rem; color: var(--text-main);">Rp 0</h3>
+          </div>
+          <div class="summary-box profit-box">
+            <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total Keuntungan Bersih
+            </p>
+            <h3 id="grandTotalLaba" style="font-size: 1.15rem; color: var(--text-main);">Rp 0</h3>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="modalHapusLaporan" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Hapus Laporan?</h3>
+        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">Yakin ingin
+          menghapus riwayat laporan ini? Data tidak bisa dikembalikan.</p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalHapusLaporan')">Batal</button>
+          <button class="modal-btn submit-btn" style="background-color: #ff3b30; color: white;"
+            onclick="konfirmasiHapusLaporan()">Hapus</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalDownloadLaporan" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Download Excel?</h3>
+        <input type="hidden" id="downloadLaporanId">
+        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">Download
+          rincian transaksi dari laporan ini dalam format Excel (.xls)?</p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalDownloadLaporan')">Batal</button>
+          <button class="modal-btn submit-btn" onclick="konfirmasiDownloadLaporan()">Download</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="script.js"></script>
+</body>
+
+</html>

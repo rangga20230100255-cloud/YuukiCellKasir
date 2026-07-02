@@ -7,6 +7,7 @@
   <title>Yuuki Cell Kasir</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -81,7 +82,7 @@
           Produk
         </button>
 
-        <button class="menu-btn outline-btn">
+        <a href="laporan.html" class="menu-btn outline-btn">
           <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
             stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="20" x2="12" y2="10"></line>
@@ -89,8 +90,20 @@
             <line x1="6" y1="20" x2="6" y2="14"></line>
           </svg>
           Laporan
-        </button>
+        </a>
       </section>
+
+      <section id="chartContainer" style="margin-top: 32px; transition: opacity 0.3s ease;">
+        <h3 class="section-title" style="font-size: 1rem; margin-bottom: 12px; color: var(--text-main);">Grafik
+          Keuntungan Harian (30 Hari)</h3>
+        <div id="chartScrollWrapper" class="summary-box"
+          style="padding: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+          <div style="min-width: 1200px; height: 220px; position: relative;">
+            <canvas id="profitChart"></canvas>
+          </div>
+        </div>
+      </section>
+
     </main>
 
   </div>
