@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator - Yuuki Cell Kasir</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="mobile-app">
+
+    <header class="app-header">
+      <div class="header-top">
+        <a href="index.html" class="icon-btn back-btn">
+          <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </a>
+        <h1>Kalkulator</h1>
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle Dark Mode">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="datetime-card">
+        <div id="dateDisplay" class="date-text">Memuat...</div>
+        <div id="timeDisplay" class="time-text">--:--:--</div>
+      </div>
+    </header>
+
+    <main class="app-content">
+      <div class="calc-wrapper">
+        <div id="calcScreen" class="calc-screen">0</div>
+
+        <div class="calc-grid">
+          <button class="calc-btn clear-btn" onclick="hapusKalkulator()">C</button>
+          <button class="calc-btn op-btn" onclick="tekanKalkulator('(')">(</button>
+          <button class="calc-btn op-btn" onclick="tekanKalkulator(')')">)</button>
+          <button class="calc-btn op-btn" onclick="tekanKalkulator('/')">÷</button>
+
+          <button class="calc-btn" onclick="tekanKalkulator('7')">7</button>
+          <button class="calc-btn" onclick="tekanKalkulator('8')">8</button>
+          <button class="calc-btn" onclick="tekanKalkulator('9')">9</button>
+          <button class="calc-btn op-btn" onclick="tekanKalkulator('*')">×</button>
+
+          <button class="calc-btn" onclick="tekanKalkulator('4')">4</button>
+          <button class="calc-btn" onclick="tekanKalkulator('5')">5</button>
+          <button class="calc-btn" onclick="tekanKalkulator('6')">6</button>
+          <button class="calc-btn op-btn" onclick="tekanKalkulator('-')">-</button>
+
+          <button class="calc-btn" onclick="tekanKalkulator('1')">1</button>
+          <button class="calc-btn" onclick="tekanKalkulator('2')">2</button>
+          <button class="calc-btn" onclick="tekanKalkulator('3')">3</button>
+          <button class="calc-btn op-btn" onclick="tekanKalkulator('+')">+</button>
+
+          <button class="calc-btn" onclick="tekanKalkulator('0')">0</button>
+          <button class="calc-btn" onclick="tekanKalkulator('.')">.</button>
+          <button class="calc-btn clear-btn" onclick="hapusSatuKalkulator()">⌫</button>
+          <button class="calc-btn eq-btn" onclick="hitungKalkulator()">=</button>
+        </div>
+      </div>
+    </main>
+
+  </div>
+  <script src="script.js"></script>
+</body>
+
+</html>

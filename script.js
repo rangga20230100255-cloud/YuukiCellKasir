@@ -534,3 +534,69 @@ window.konfirmasiHapusLaporan = function () {
     tutupModal('modalHapusLaporan');
   }
 }
+
+// --- 9. LOGIKA KALKULATOR DINAMIS ---
+let currentCalcInput = '0';
+const calcScreen = document.getElementById('calcScreen');
+
+window.tekanKalkulator = function (val) {
+  if (!calcScreen) return;
+
+  // Ganti angka 0 di awal jika mengetik angka baru
+  if (currentCalcInput === '0' && val !== '.' && val !== '*' && val !== '/' && val !== '+' && val !== '-') {
+    currentCalcInput = val;
+  } else {
+    // Cegah operator ganda berjejer (contoh: ++ atau +*)
+    const lastChar = currentCalcInput.slice(-1);
+    const isOp = (char) => ['+', '-', '*', '/'].includes(char);
+
+    if (isOp(lastChar) && isOp(val)) {
+      currentCalcInput = currentCalcInput.slice(0, -1) + val; // Ganti operator terakhir
+    } else {
+      currentCalcInput += val;
+    }
+  }
+  updateLayarKalkulator();
+}
+
+window.hitungKalkulator = function () {
+  if (!calcScreen) return;
+  try {
+    let hasil = eval(currentCalcInput);
+
+    // Membatasi angka desimal agar tidak kepanjangan keluar layar
+    if (!Number.isInteger(hasil)) {
+      hasil = parseFloat(hasil.toFixed(4));
+    }
+
+    currentCalcInput = String(hasil);
+    updateLayarKalkulator();
+  } catch (e) {
+    calcScreen.textContent = 'Error';
+    setTimeout(() => {
+      currentCalcInput = '0';
+      updateLayarKalkulator();
+    }, 1000);
+  }
+}
+
+window.hapusKalkulator = function () {
+  if (!calcScreen) return;
+  currentCalcInput = '0';
+  updateLayarKalkulator();
+}
+
+window.hapusSatuKalkulator = function () {
+  if (!calcScreen) return;
+  if (currentCalcInput.length > 1) {
+    currentCalcInput = currentCalcInput.slice(0, -1);
+  } else {
+    currentCalcInput = '0';
+  }
+  updateLayarKalkulator();
+}
+
+function updateLayarKalkulator() {
+  // Menampilkan tanda kali dan bagi agar lebih estetik di mata pengguna
+  calcScreen.textContent = currentCalcInput.replace(/\*/g, '×').replace(/\//g, '÷');
+}

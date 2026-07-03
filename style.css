@@ -182,8 +182,9 @@ a {
 /* --- DASHBOARD: MENU GRID --- */
 .menu-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: 1fr 1fr 1fr;
+  /* Diubah menjadi 3 Kolom agar pas */
+  gap: 12px;
 }
 
 .menu-btn {
@@ -191,9 +192,11 @@ a {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px 10px;
+  padding: 16px 6px;
+  /* Disesuaikan agar 3 tombol muat dengan rapi */
   border-radius: 16px;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  /* Teks sedikit dikecilkan agar proporsional */
   font-weight: 600;
   cursor: pointer;
   border: none;
@@ -205,8 +208,8 @@ a {
 }
 
 .menu-btn svg.icon {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   margin-bottom: 8px;
   stroke: currentColor;
 }
@@ -214,7 +217,8 @@ a {
 .primary-btn {
   background-color: var(--stabilo-green);
   color: #000000;
-  grid-column: span 2;
+  grid-column: span 3;
+  /* Membentang penuh melewati 3 kolom */
   flex-direction: row;
   gap: 12px;
   padding: 16px;
@@ -224,8 +228,6 @@ a {
 
 .primary-btn svg.icon {
   margin-bottom: 0;
-  width: 24px;
-  height: 24px;
 }
 
 .primary-btn:hover {
@@ -240,6 +242,81 @@ a {
 
 .outline-btn:hover {
   border-color: var(--stabilo-green);
+}
+
+/* --- DESAIN KALKULATOR (TAMBAHKAN DI PALING BAWAH STYLE.CSS) --- */
+.calc-wrapper {
+  background-color: transparent;
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 10px;
+}
+
+.calc-screen {
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: right;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--stabilo-green);
+  margin-bottom: 20px;
+  min-height: 85px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  word-wrap: break-word;
+  word-break: break-all;
+}
+
+[data-theme="dark"] .calc-screen {
+  background-color: #000;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.calc-btn {
+  background-color: transparent;
+  border: 2px solid var(--border-color);
+  color: var(--text-main);
+  padding: 16px 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.calc-btn:active {
+  transform: scale(0.95);
+}
+
+.calc-btn:hover {
+  border-color: var(--stabilo-green);
+}
+
+.calc-btn.op-btn {
+  color: var(--stabilo-green);
+  border-color: rgba(57, 255, 20, 0.3);
+  background-color: rgba(57, 255, 20, 0.05);
+}
+
+.calc-btn.eq-btn {
+  background-color: var(--stabilo-green);
+  color: #000;
+  border: none;
+}
+
+.calc-btn.clear-btn {
+  color: #ff3b30;
+  border-color: rgba(255, 59, 48, 0.3);
+  background-color: rgba(255, 59, 48, 0.05);
 }
 
 /* --- RIWAYAT: KARTU TRANSAKSI --- */
@@ -510,4 +587,28 @@ a {
 
 .submit-btn:hover {
   background-color: var(--stabilo-dark);
+}
+
+/* --- CUSTOM SCROLLBAR (Garis Geser Estetik) --- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  /* Mengatur ketebalan garis geser horizontal */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  /* Latar belakang garis gesernya tembus pandang */
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  /* Warna garis ngikutin tema (abu-abu gelap/terang) */
+  border-radius: 10px;
+  /* Bikin ujungnya melengkung halus */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--stabilo-green);
+  /* Berubah jadi hijau stabilo saat disentuh/digeser! */
 }
