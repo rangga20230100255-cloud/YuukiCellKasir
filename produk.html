@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manajemen Produk - Yuuki Cell Kasir</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="mobile-app">
+
+    <header class="app-header">
+      <div class="header-top">
+        <a href="index.html" class="icon-btn back-btn">
+          <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </a>
+        <h1>Katalog & Stok</h1>
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle Dark Mode">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="datetime-card">
+        <div id="dateDisplay" class="date-text">Memuat...</div>
+        <div id="timeDisplay" class="time-text">--:--:--</div>
+      </div>
+    </header>
+
+    <main class="app-content">
+
+      <section id="viewKategori">
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+          <button onclick="bukaModalTambahKategori()" class="menu-btn primary-btn" style="width: 100%;">
+            <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Tambah Kategori Baru
+          </button>
+
+          <button onclick="bukaModalHapusSemuaProduk()" class="menu-btn outline-btn"
+            style="width: 100%; flex-direction: row; gap: 10px; padding: 14px; color: #ff3b30; border-color: rgba(255, 59, 48, 0.3);">
+            <svg class="icon" style="width: 20px; height: 20px; margin: 0;" viewBox="0 0 24 24" stroke="currentColor"
+              stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Kosongkan Seluruh Katalog
+          </button>
+        </div>
+
+        <h3 class="section-title">Keranjang Kategori</h3>
+        <div id="kategoriList" class="category-grid">
+        </div>
+      </section>
+
+      <section id="viewProduk" style="display: none;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+          <button class="icon-btn" onclick="kembaliKeKategori()"
+            style="border: 1px solid var(--border-color); padding: 8px; border-radius: 8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <h3 class="section-title" id="judulKategori" style="margin-bottom: 0; color: var(--stabilo-green);">Kategori
+          </h3>
+        </div>
+
+        <button onclick="bukaModalTambahProduk()" class="menu-btn primary-btn"
+          style="width: 100%; margin-bottom: 24px; padding: 14px;">
+          <svg class="icon" style="width: 20px; height: 20px; margin: 0; margin-right: 8px;" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Tambah Produk ke Keranjang Ini
+        </button>
+
+        <div id="produkList" class="transaction-list">
+        </div>
+      </section>
+    </main>
+
+    <div id="modalTambahKategori" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Tambah Kategori</h3>
+        <div class="form-group">
+          <label>Nama Keranjang / Kategori</label>
+          <input type="text" id="katNama" placeholder="Contoh: TSEL, XL, AKSESORIS" autocomplete="off">
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalTambahKategori')">Batal</button>
+          <button class="modal-btn submit-btn" onclick="simpanKategoriBaru()">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalTambahProduk" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Tambah Produk</h3>
+        <div class="form-group">
+          <label>Nama Barang / Produk</label>
+          <input type="text" id="prodNama" placeholder="Contoh: Pulsa Tsel 50k" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Jumlah Stok Awal</label>
+          <input type="number" id="prodStok" placeholder="0">
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Harga Modal</label>
+            <input type="number" id="prodBeli" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Harga Jual</label>
+            <input type="number" id="prodJual" placeholder="0">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalTambahProduk')">Batal</button>
+          <button class="modal-btn submit-btn" onclick="simpanProdukBaru()">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalEditProduk" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Edit Produk</h3>
+        <input type="hidden" id="editProdId">
+        <div class="form-group">
+          <label>Nama Barang / Produk</label>
+          <input type="text" id="editProdNama" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Jumlah Stok</label>
+          <input type="number" id="editProdStok">
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Harga Modal</label>
+            <input type="number" id="editProdBeli">
+          </div>
+          <div class="form-group">
+            <label>Harga Jual</label>
+            <input type="number" id="editProdJual">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalEditProduk')">Batal</button>
+          <button class="modal-btn submit-btn" onclick="simpanEditProduk()">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalHapusProduk" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Hapus Produk?</h3>
+        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">Yakin ingin
+          menghapus produk ini dari katalog?</p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalHapusProduk')">Batal</button>
+          <button class="modal-btn submit-btn" style="background-color: #ff3b30; color: white;"
+            onclick="konfirmasiHapusProduk()">Hapus</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalHapusSemuaProduk" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Kosongkan Katalog?</h3>
+        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">PERINGATAN:
+          Tindakan ini akan menghapus semua keranjang kategori dan produk di dalamnya. Data tidak bisa dikembalikan.</p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalHapusSemuaProduk')">Batal</button>
+          <button class="modal-btn submit-btn" style="background-color: #ff3b30; color: white;"
+            onclick="konfirmasiHapusSemuaProduk()">Kosongkan</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="script.js"></script>
+</body>
+
+</html>
