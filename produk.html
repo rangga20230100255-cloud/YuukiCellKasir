@@ -104,6 +104,38 @@
       </div>
     </div>
 
+    <div id="modalEditKategori" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Edit Nama Kategori</h3>
+        <input type="hidden" id="oldKatNama">
+        <div class="form-group">
+          <label>Ubah Nama Keranjang</label>
+          <input type="text" id="newKatNama" autocomplete="off">
+        </div>
+        <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-bottom: 16px;">Produk di
+          dalamnya akan otomatis pindah ke nama baru ini.</p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalEditKategori')">Batal</button>
+          <button class="modal-btn submit-btn" onclick="simpanEditKategori()">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalHapusKategori" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Hapus Keranjang?</h3>
+        <input type="hidden" id="hapusKatNama">
+        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">Yakin ingin
+          menghapus keranjang <strong id="hapusKatLabel" style="color: var(--text-main);"></strong>? <br><br><span
+            style="color: #ff3b30;">PERINGATAN: Semua produk di dalamnya juga akan terhapus secara permanen!</span></p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalHapusKategori')">Batal</button>
+          <button class="modal-btn submit-btn" style="background-color: #ff3b30; color: white;"
+            onclick="konfirmasiHapusKategori()">Hapus</button>
+        </div>
+      </div>
+    </div>
+
     <div id="modalTambahProduk" class="modal-overlay">
       <div class="modal-card">
         <h3>Tambah Produk</h3>
@@ -140,10 +172,6 @@
           <label>Nama Barang / Produk</label>
           <input type="text" id="editProdNama" autocomplete="off">
         </div>
-        <div class="form-group">
-          <label>Jumlah Stok</label>
-          <input type="number" id="editProdStok">
-        </div>
         <div class="form-grid">
           <div class="form-group">
             <label>Harga Modal</label>
@@ -157,6 +185,40 @@
         <div class="modal-actions">
           <button class="modal-btn cancel-btn" onclick="tutupModal('modalEditProduk')">Batal</button>
           <button class="modal-btn submit-btn" onclick="simpanEditProduk()">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalTambahStok" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Tambah Stok</h3>
+        <input type="hidden" id="tambahStokId">
+        <p id="tambahStokNama"
+          style="text-align: center; font-weight: 700; color: var(--stabilo-green); margin-bottom: 16px;"></p>
+        <div class="form-group">
+          <label>Berapa stok yang masuk?</label>
+          <input type="number" id="inputTambahStok" placeholder="Contoh: 10">
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalTambahStok')">Batal</button>
+          <button class="modal-btn submit-btn" onclick="simpanTambahStok()">Tambah</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modalKurangStok" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Kurangi Stok</h3>
+        <input type="hidden" id="kurangStokId">
+        <p id="kurangStokNama" style="text-align: center; font-weight: 700; color: #ff9f0a; margin-bottom: 16px;"></p>
+        <div class="form-group">
+          <label>Berapa stok yang dikurangi/terjual?</label>
+          <input type="number" id="inputKurangStok" placeholder="Contoh: 2">
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalKurangStok')">Batal</button>
+          <button class="modal-btn submit-btn" style="background-color: #ff9f0a; color: white;"
+            onclick="simpanKurangStok()">Kurangi</button>
         </div>
       </div>
     </div>
@@ -178,7 +240,7 @@
       <div class="modal-card">
         <h3>Kosongkan Katalog?</h3>
         <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">PERINGATAN:
-          Tindakan ini akan menghapus semua keranjang kategori dan produk di dalamnya. Data tidak bisa dikembalikan.</p>
+          Tindakan ini akan menghapus semua keranjang kategori dan produk. Data tidak bisa dikembalikan.</p>
         <div class="modal-actions">
           <button class="modal-btn cancel-btn" onclick="tutupModal('modalHapusSemuaProduk')">Batal</button>
           <button class="modal-btn submit-btn" style="background-color: #ff3b30; color: white;"

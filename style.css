@@ -182,8 +182,8 @@ a {
 /* --- DASHBOARD: MENU GRID --- */
 .menu-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  /* Diubah menjadi 3 Kolom agar pas */
+  grid-template-columns: 1fr 1fr;
+  /* Diubah menjadi 2 Kolom agar 4 tombol tersusun simetris 2x2 */
   gap: 12px;
 }
 
@@ -192,11 +192,9 @@ a {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px 6px;
-  /* Disesuaikan agar 3 tombol muat dengan rapi */
+  padding: 16px 10px;
   border-radius: 16px;
-  font-size: 0.75rem;
-  /* Teks sedikit dikecilkan agar proporsional */
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   border: none;
@@ -217,8 +215,8 @@ a {
 .primary-btn {
   background-color: var(--stabilo-green);
   color: #000000;
-  grid-column: span 3;
-  /* Membentang penuh melewati 3 kolom */
+  grid-column: span 2;
+  /* Menutupi 2 kolom penuh di atas */
   flex-direction: row;
   gap: 12px;
   padding: 16px;
@@ -242,6 +240,76 @@ a {
 
 .outline-btn:hover {
   border-color: var(--stabilo-green);
+}
+
+/* --- FORM DINAMIS FAKTUR --- */
+/* Perbaikan Tampilan Baris Faktur */
+.dynamic-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 45px;
+  /* Menyesuaikan lebar kolom agar lebih proporsional */
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+  /* Memastikan input dan tombol sejajar tengah secara vertikal */
+}
+
+.dynamic-row input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  box-sizing: border-box;
+  /* Agar padding tidak merusak lebar */
+  font-size: 0.9rem;
+}
+
+/* Memastikan tombol hapus di baris faktur juga sejajar dan rapi */
+.dynamic-row .btn-hapus {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- CETAK PDF FAKTUR (Tersembunyi dari layar) --- */
+#invoicePrintArea {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: #fff;
+  color: #000;
+  width: 800px;
+  padding: 40px;
+  font-family: Arial, sans-serif;
+}
+
+.inv-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 3px solid #39FF14;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.inv-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+}
+
+.inv-table th,
+.inv-table td {
+  border: 1px solid #ccc;
+  padding: 12px;
+  text-align: left;
+}
+
+.inv-table th {
+  background-color: #f4f4f5;
+  color: #000;
 }
 
 /* --- DESAIN KALKULATOR (TAMBAHKAN DI PALING BAWAH STYLE.CSS) --- */
@@ -709,4 +777,54 @@ a {
   color: var(--text-main);
   font-weight: 700;
   font-size: 0.75rem;
+}
+
+/* --- RIWAYAT PRODUK (TIMELINE) --- */
+.history-date {
+  font-size: 0.75rem;
+  color: var(--stabilo-green);
+  font-weight: 700;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 4px;
+}
+
+.history-item {
+  font-size: 0.75rem;
+  color: var(--text-main);
+  margin-bottom: 8px;
+  padding-left: 12px;
+  border-left: 2px solid var(--border-color);
+  position: relative;
+}
+
+.history-item::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 4px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--bg-color);
+  border: 2px solid var(--stabilo-green);
+  border-radius: 50%;
+}
+
+.history-time {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 2px;
+}
+
+/* --- TOMBOL AKSI DI DALAM KERANJANG KATEGORI --- */
+.cat-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: auto;
+  border-top: 1px dashed var(--border-color);
+  padding-top: 12px;
 }

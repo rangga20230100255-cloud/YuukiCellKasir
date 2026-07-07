@@ -17,7 +17,6 @@ updateDateTime();
 const themeToggleBtn = document.getElementById('themeToggle');
 const bodyElement = document.documentElement;
 const currentTheme = localStorage.getItem('theme');
-
 if (currentTheme) bodyElement.setAttribute('data-theme', currentTheme);
 
 if (themeToggleBtn) {
@@ -26,7 +25,6 @@ if (themeToggleBtn) {
     if (targetTheme === 'light') bodyElement.removeAttribute('data-theme');
     else bodyElement.setAttribute('data-theme', 'dark');
     localStorage.setItem('theme', targetTheme);
-
     if (typeof renderChart === 'function') setTimeout(renderChart, 100);
   });
 }
@@ -35,33 +33,26 @@ if (themeToggleBtn) {
 let dataTransaksi = JSON.parse(localStorage.getItem('riwayat_yuuki')) || [];
 let dataLaporan = JSON.parse(localStorage.getItem('laporan_yuuki')) || [];
 let dataProduk = JSON.parse(localStorage.getItem('produk_yuuki')) || [];
-let dataKategori = JSON.parse(localStorage.getItem('kategori_yuuki')) || []; // Penyimpanan Keranjang
+let dataKategori = JSON.parse(localStorage.getItem('kategori_yuuki')) || [];
 
-// Auto-Migrasi (Jika buka web versi baru tapi punya produk versi lama, otomatis buatkan kategorinya)
-if (dataKategori.length === 0 && dataProduk.length > 0) {
-  const cats = new Set();
-  dataProduk.forEach(p => cats.add((p.kategori || 'UMUM').toUpperCase()));
-  dataKategori = Array.from(cats);
-  localStorage.setItem('kategori_yuuki', JSON.stringify(dataKategori));
-}
-
-dataTransaksi = dataTransaksi.map((trx, index) => {
-  if (!trx.id) trx.id = Date.now() + index;
-  return trx;
+dataProduk = dataProduk.map(p => {
+  if (!p.riwayat) p.riwayat = [];
+  return p;
 });
 
 function formatRupiah(angka) {
   return 'Rp ' + angka.toLocaleString('id-ID');
 }
 
-// --- IKON SVG MODERN UNTUK TOMBOL ---
-const iconEdit = `<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
-const iconDelete = `<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
-const iconCheck = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-const iconBook = `<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`;
-const iconDownload = `<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
-const iconPlus = `<svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
-const iconMinus = `<svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+// --- IKON SVG MODERN (SUDAH DIPERBAIKI AGAR TIDAK BLOK HITAM) ---
+const iconEdit = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+const iconDelete = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+const iconCheck = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+const iconBook = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`;
+const iconDownload = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
+const iconPlus = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+const iconMinus = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+const iconHistory = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
 
 // --- RENDER DASHBOARD UTAMA & SENSOR MATA ---
 function updateDashboard() {
@@ -103,10 +94,6 @@ if (btnToggleSaldo) {
     }
     updateDashboard();
   });
-  const iconEye = document.getElementById('iconEye');
-  if (localStorage.getItem('saldo_visible') === 'false') {
-    iconEye.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
-  }
 }
 
 // --- LOGIKA GRAFIK BULANAN ---
@@ -140,23 +127,12 @@ window.renderChart = function () {
     data: {
       labels: displayLabels,
       datasets: [{
-        label: 'Keuntungan',
-        data: dataPoints,
-        borderColor: '#39FF14',
-        backgroundColor: 'rgba(57, 255, 20, 0.1)',
-        borderWidth: 3,
-        pointBackgroundColor: isDark ? '#121212' : '#ffffff',
-        pointBorderColor: '#39FF14',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        fill: true,
-        tension: 0.3
+        label: 'Keuntungan', data: dataPoints, borderColor: '#39FF14', backgroundColor: 'rgba(57, 255, 20, 0.1)', borderWidth: 3,
+        pointBackgroundColor: isDark ? '#121212' : '#ffffff', pointBorderColor: '#39FF14', pointBorderWidth: 2, pointRadius: 4, fill: true, tension: 0.3
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (context) { return formatRupiah(context.raw); } } } },
+      responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (context) { return formatRupiah(context.raw); } } } },
       scales: {
         y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { family: 'Space Grotesk' }, precision: 0, callback: function (value) { return 'Rp ' + value.toLocaleString('id-ID'); } } },
         x: { grid: { display: false }, ticks: { color: textColor, font: { family: 'Space Grotesk' } } }
@@ -170,6 +146,201 @@ window.renderChart = function () {
   }
 }
 
+// --- LOGIKA HALAMAN FAKTUR ---
+function renderFakturList() {
+  const list = document.getElementById('fakturList');
+  if (!list) return;
+  list.innerHTML = '';
+
+  if (dataFaktur.length === 0) {
+    list.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Belum ada faktur yang dibuat.</p>`;
+    return;
+  }
+
+  [...dataFaktur].reverse().forEach(fak => {
+    const card = document.createElement('div');
+    card.classList.add('trx-card');
+    card.innerHTML = `
+            <div class="trx-header" style="align-items: flex-start; border-bottom: 1px dashed var(--border-color); padding-bottom: 12px;">
+                <div>
+                    <span class="trx-name" style="color: var(--text-main);">INV-${fak.id}</span>
+                    <br><span style="font-size: 0.75rem; color: var(--text-muted);">Pembeli: <strong style="color:var(--text-main);">${fak.pembeli}</strong></span>
+                </div>
+                <div style="text-align: right;">
+                    <span class="trx-date">${fak.tanggalStr}</span>
+                </div>
+            </div>
+            
+            <div class="trx-profit" style="margin-top: 12px; background: transparent; padding: 0; border: none; display: flex; justify-content: space-between;">
+                <p>Grand Total Faktur</p><h4 style="color: var(--stabilo-green); font-size: 1.2rem;">${formatRupiah(fak.grandTotal)}</h4>
+            </div>
+            
+            <div class="trx-actions" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 16px;">
+                <button class="action-btn" style="border-color: rgba(57,255,20,0.3); color: var(--stabilo-green);" onclick="downloadPDF(${fak.id})">${iconDownload} PDF</button>
+                <button class="action-btn" onclick="bukaModalFaktur(${fak.id})">${iconEdit} Edit</button>
+                <button class="action-btn btn-hapus" onclick="hapusFaktur(${fak.id})">${iconDelete} Hapus</button>
+            </div>
+        `;
+    list.appendChild(card);
+  });
+}
+
+// LOGIKA MODAL FORM FAKTUR (Dinami Tambah Baris)
+let currentFakturItems = []; // [{nama: '', harga: 0}]
+
+function renderFakturItemRows() {
+  const container = document.getElementById('fakItemContainer');
+  container.innerHTML = '';
+  currentFakturItems.forEach((item, index) => {
+    container.innerHTML += `
+            <div class="dynamic-row">
+                <input type="text" placeholder="Nama barang / layanan" value="${item.nama}" onchange="updateFakturItem(${index}, 'nama', this.value)">
+                <input type="number" placeholder="Harga" value="${item.harga === 0 ? '' : item.harga}" onchange="updateFakturItem(${index}, 'harga', this.value)">
+                <button class="action-btn btn-hapus" style="padding:0; border-radius: 8px;" onclick="hapusBarisFaktur(${index})">${iconDelete}</button>
+            </div>
+        `;
+  });
+}
+
+window.updateFakturItem = function (index, field, value) {
+  if (field === 'harga') currentFakturItems[index].harga = parseInt(value) || 0;
+  else currentFakturItems[index].nama = value;
+}
+window.tambahBarisFaktur = function () {
+  currentFakturItems.push({ nama: '', harga: 0 });
+  renderFakturItemRows();
+}
+window.hapusBarisFaktur = function (index) {
+  if (currentFakturItems.length > 1) {
+    currentFakturItems.splice(index, 1);
+    renderFakturItemRows();
+  } else {
+    alert('Minimal harus ada 1 barang/keterangan di faktur.');
+  }
+}
+
+// SIMPAN & EDIT FAKTUR
+window.bukaModalFaktur = function (id = null) {
+  const today = new Date().toISOString().split('T')[0];
+
+  if (id) {
+    // Edit Mode
+    const f = dataFaktur.find(x => x.id === id);
+    document.getElementById('modalFakturTitle').textContent = 'Edit Faktur';
+    document.getElementById('fakId').value = f.id;
+    document.getElementById('fakTanggal').value = f.tanggalRaw;
+    document.getElementById('fakPembeli').value = f.pembeli;
+    document.getElementById('fakCatatan').value = f.catatan;
+    currentFakturItems = JSON.parse(JSON.stringify(f.items));
+  } else {
+    // Tambah Mode
+    document.getElementById('modalFakturTitle').textContent = 'Buat Faktur Baru';
+    document.getElementById('fakId').value = '';
+    document.getElementById('fakTanggal').value = today;
+    document.getElementById('fakPembeli').value = '';
+    document.getElementById('fakCatatan').value = '';
+    currentFakturItems = [{ nama: '', harga: 0 }];
+  }
+
+  renderFakturItemRows();
+  document.getElementById('modalFaktur').classList.add('active');
+}
+
+window.simpanFaktur = function () {
+  const idStr = document.getElementById('fakId').value;
+  const tglRaw = document.getElementById('fakTanggal').value;
+  if (!tglRaw) return alert('Pilih tanggal terlebih dahulu!');
+
+  // Format Tanggal
+  const tglObj = new Date(tglRaw);
+  const tglStr = tglObj.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+
+  const pembeli = document.getElementById('fakPembeli').value || 'Pelanggan Umum';
+  const catatan = document.getElementById('fakCatatan').value || '-';
+
+  // Hitung Grand Total
+  let grandTotal = 0;
+  const validItems = currentFakturItems.filter(i => i.nama.trim() !== ''); // Buang yang kosong
+  if (validItems.length === 0) return alert('Masukkan minimal 1 nama barang!');
+
+  validItems.forEach(i => grandTotal += i.harga);
+
+  if (idStr) {
+    // Update data
+    const id = parseInt(idStr);
+    const index = dataFaktur.findIndex(x => x.id === id);
+    dataFaktur[index] = { id, tanggalRaw: tglRaw, tanggalStr: tglStr, pembeli, catatan, items: validItems, grandTotal };
+  } else {
+    // Insert data (ID format pendek 6 angka agar bagus di PDF)
+    const shortId = Math.floor(100000 + Math.random() * 900000);
+    dataFaktur.push({ id: shortId, tanggalRaw: tglRaw, tanggalStr: tglStr, pembeli, catatan, items: validItems, grandTotal });
+  }
+
+  localStorage.setItem('faktur_yuuki', JSON.stringify(dataFaktur));
+  updateDashboard();
+  renderFakturList();
+  tutupModal('modalFaktur');
+}
+
+// HAPUS FAKTUR
+let idFakturAkanDihapus = null;
+window.hapusFaktur = function (id) {
+  idFakturAkanDihapus = id;
+  document.getElementById('modalHapusFaktur').classList.add('active');
+}
+window.konfirmasiHapusFaktur = function () {
+  dataFaktur = dataFaktur.filter(x => x.id !== idFakturAkanDihapus);
+  localStorage.setItem('faktur_yuuki', JSON.stringify(dataFaktur));
+  updateDashboard();
+  renderFakturList();
+  tutupModal('modalHapusFaktur');
+}
+
+// DOWNLOAD PDF FAKTUR MENGGUNAKAN HTML2PDF
+window.downloadPDF = function (id) {
+  const f = dataFaktur.find(x => x.id === id);
+  if (!f) return;
+
+  // Masukkan data ke format Print (Tersembunyi)
+  document.getElementById('pdfNoFaktur').textContent = `INV-${f.id}`;
+  document.getElementById('pdfTanggal').textContent = f.tanggalStr;
+  document.getElementById('pdfPembeli').textContent = f.pembeli;
+  document.getElementById('pdfCatatan').textContent = f.catatan;
+  document.getElementById('pdfGrandTotal').textContent = formatRupiah(f.grandTotal);
+
+  let tbody = '';
+  f.items.forEach((item, index) => {
+    tbody += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${item.nama}</td>
+                <td style="text-align: right;">${formatRupiah(item.harga)}</td>
+            </tr>
+        `;
+  });
+  document.getElementById('pdfTableBody').innerHTML = tbody;
+
+  // Panggil html2pdf
+  const element = document.getElementById('invoicePrintArea');
+  const opt = {
+    margin: 0,
+    filename: `Faktur_${f.pembeli.replace(/ /g, '_')}_INV${f.id}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+  };
+
+  // Render jadi PDF
+  html2pdf().set(opt).from(element).save();
+}
+
+function tutupModal(idModal) {
+  document.getElementById(idModal).classList.remove('active');
+}
+
+// PANGGIL RENDER SAAT APLIKASI DIBUKA
+updateDashboard();
+if (document.getElementById('fakturList')) renderFakturList();
 
 // --- RENDER HALAMAN RIWAYAT & LAPORAN ---
 window.toggleRiwayat = function (id) {
@@ -186,27 +357,16 @@ window.toggleRiwayat = function (id) {
 
 function renderDaftarTransaksi() {
   const transactionList = document.getElementById('transactionList');
-  const elRiwayatJual = document.getElementById('riwayatTotalJual');
-  const elRiwayatModal = document.getElementById('riwayatTotalModal');
-  const elRiwayatLaba = document.getElementById('riwayatTotalLaba');
   if (!transactionList) return;
-
   transactionList.innerHTML = '';
-  let rTotalJual = 0, rTotalModal = 0, rTotalLaba = 0;
 
   if (dataTransaksi.length === 0) {
     transactionList.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Belum ada transaksi.</p>`;
-    if (elRiwayatJual) elRiwayatJual.textContent = 'Rp 0';
-    if (elRiwayatModal) elRiwayatModal.textContent = 'Rp 0';
-    if (elRiwayatLaba) elRiwayatLaba.textContent = 'Rp 0';
     return;
   }
 
   [...dataTransaksi].reverse().forEach(trx => {
     const keuntungan = trx.hargaJual - trx.hargaBeli;
-    rTotalJual += trx.hargaJual;
-    rTotalModal += trx.hargaBeli;
-    rTotalLaba += keuntungan;
     const trxCard = document.createElement('div');
     trxCard.classList.add('trx-card');
 
@@ -244,45 +404,19 @@ function renderDaftarTransaksi() {
         `;
     transactionList.appendChild(trxCard);
   });
-
-  if (elRiwayatJual) elRiwayatJual.textContent = formatRupiah(rTotalJual);
-  if (elRiwayatModal) elRiwayatModal.textContent = formatRupiah(rTotalModal);
-  if (elRiwayatLaba) elRiwayatLaba.textContent = formatRupiah(rTotalLaba);
-}
-
-window.toggleLaporan = function (id) {
-  const detailDiv = document.getElementById('laporan-detail-' + id);
-  const iconSvg = document.getElementById('icon-toggle-' + id);
-  if (detailDiv.style.display === 'none') {
-    detailDiv.style.display = 'block';
-    iconSvg.style.transform = 'rotate(180deg)';
-  } else {
-    detailDiv.style.display = 'none';
-    iconSvg.style.transform = 'rotate(0deg)';
-  }
 }
 
 function renderLaporan() {
   const laporanList = document.getElementById('laporanList');
-  const elGrandJual = document.getElementById('grandTotalJual');
-  const elGrandModal = document.getElementById('grandTotalModal');
-  const elGrandLaba = document.getElementById('grandTotalLaba');
   if (!laporanList) return;
-
   laporanList.innerHTML = '';
+
   if (dataLaporan.length === 0) {
     laporanList.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Belum ada laporan yang diekspor.</p>`;
-    if (elGrandJual) elGrandJual.textContent = 'Rp 0';
-    if (elGrandModal) elGrandModal.textContent = 'Rp 0';
-    if (elGrandLaba) elGrandLaba.textContent = 'Rp 0';
     return;
   }
 
-  let grandJual = 0, grandModal = 0, grandLaba = 0;
   [...dataLaporan].reverse().forEach(lap => {
-    grandJual += lap.totalJual;
-    grandModal += lap.totalModal;
-    grandLaba += lap.totalLaba;
     const lapCard = document.createElement('div');
     lapCard.classList.add('trx-card');
 
@@ -306,13 +440,9 @@ function renderLaporan() {
         `;
     laporanList.appendChild(lapCard);
   });
-
-  if (elGrandJual) elGrandJual.textContent = formatRupiah(grandJual);
-  if (elGrandModal) elGrandModal.textContent = formatRupiah(grandModal);
-  if (elGrandLaba) elGrandLaba.textContent = formatRupiah(grandLaba);
 }
 
-// --- RENDER HALAMAN PRODUK (ALUR BARU: KATEGORI DULU, BARU PRODUK) ---
+// --- RENDER HALAMAN PRODUK & EDIT/HAPUS KATEGORI ---
 let currentKategoriView = null;
 
 function renderProdukUI() {
@@ -341,11 +471,8 @@ function renderKeranjangKategori() {
     return;
   }
 
-  // Buat kotak sesuai daftar Keranjang yang terdaftar di sistem
   dataKategori.forEach(kat => {
     let count = 0, modal = 0, jual = 0;
-
-    // Hitung isi produk di dalam keranjang ini
     dataProduk.forEach(p => {
       if ((p.kategori || '').toUpperCase() === kat) {
         count++;
@@ -360,14 +487,93 @@ function renderKeranjangKategori() {
       currentKategoriView = kat;
       renderProdukUI();
     };
+
     card.innerHTML = `
             <h4>${kat}</h4>
             <div class="cat-stat">Banyak Item <span>${count}</span></div>
             <div class="cat-stat">Total Modal <span>${formatRupiah(modal)}</span></div>
-            <div class="cat-stat">Total Jual <span style="color:var(--stabilo-green);">${formatRupiah(jual)}</span></div>
+            <div class="cat-stat" style="margin-bottom: 10px;">Total Jual <span style="color:var(--stabilo-green);">${formatRupiah(jual)}</span></div>
+            
+            <div class="cat-actions">
+                <button class="action-btn" onclick="bukaModalEditKategori('${kat}', event)">${iconEdit} Edit</button>
+                <button class="action-btn btn-hapus" onclick="bukaModalHapusKategori('${kat}', event)">${iconDelete} Hapus</button>
+            </div>
         `;
     list.appendChild(card);
   });
+}
+
+// LOGIKA EDIT KATEGORI
+window.bukaModalEditKategori = function (namaLama, event) {
+  event.stopPropagation();
+  document.getElementById('oldKatNama').value = namaLama;
+  document.getElementById('newKatNama').value = namaLama;
+  document.getElementById('modalEditKategori').classList.add('active');
+}
+window.simpanEditKategori = function () {
+  const namaLama = document.getElementById('oldKatNama').value;
+  let namaBaru = document.getElementById('newKatNama').value.trim().toUpperCase();
+
+  if (!namaBaru) return alert('Nama kategori tidak boleh kosong!');
+  if (namaBaru === namaLama) return tutupModal('modalEditKategori');
+  if (dataKategori.includes(namaBaru)) return alert('Nama kategori ini sudah ada!');
+
+  const katIndex = dataKategori.indexOf(namaLama);
+  if (katIndex !== -1) {
+    dataKategori[katIndex] = namaBaru;
+  }
+
+  dataProduk.forEach(p => {
+    if ((p.kategori || '').toUpperCase() === namaLama) {
+      p.kategori = namaBaru;
+    }
+  });
+
+  simpanDataProduk();
+  tutupModal('modalEditKategori');
+}
+
+// LOGIKA HAPUS KATEGORI
+window.bukaModalHapusKategori = function (namaKat, event) {
+  event.stopPropagation();
+  document.getElementById('hapusKatNama').value = namaKat;
+  document.getElementById('hapusKatLabel').textContent = namaKat;
+  document.getElementById('modalHapusKategori').classList.add('active');
+}
+window.konfirmasiHapusKategori = function () {
+  const namaKat = document.getElementById('hapusKatNama').value;
+  dataKategori = dataKategori.filter(k => k !== namaKat);
+  dataProduk = dataProduk.filter(p => (p.kategori || '').toUpperCase() !== namaKat);
+
+  simpanDataProduk();
+  tutupModal('modalHapusKategori');
+}
+
+
+window.toggleRiwayatProd = function (id) {
+  const detailDiv = document.getElementById('riwayat-prod-' + id);
+  const iconSvg = document.getElementById('icon-riwayat-prod-' + id);
+  if (detailDiv.style.display === 'none') {
+    detailDiv.style.display = 'block';
+    iconSvg.style.transform = 'rotate(180deg)';
+  } else {
+    detailDiv.style.display = 'none';
+    iconSvg.style.transform = 'rotate(0deg)';
+  }
+}
+
+function renderHTMLRiwayatProduk(riwayatArray) {
+  if (!riwayatArray || riwayatArray.length === 0) return '<p style="font-size:0.75rem; color:var(--text-muted); text-align:center;">Belum ada catatan riwayat perubahan.</p>';
+  let html = '';
+  let currentDate = '';
+  riwayatArray.forEach(r => {
+    if (r.tanggal !== currentDate) {
+      html += `<div class="history-date">${r.tanggal}</div>`;
+      currentDate = r.tanggal;
+    }
+    html += `<div class="history-item"><span class="history-time">${r.jam}</span> ${r.aksi}</div>`;
+  });
+  return html;
 }
 
 function renderDaftarProdukKategori(kategoriTujuan) {
@@ -391,13 +597,9 @@ function renderDaftarProdukKategori(kategoriTujuan) {
                 <div>
                     <span class="trx-name" style="font-size: 1.15rem; color: var(--text-main);">${prod.nama}</span>
                 </div>
-                <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                <div style="text-align: right;">
                     <p style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin:0;">Sisa Stok</p>
-                    <div style="display: flex; align-items: center; gap: 10px; background: transparent; border: 1px solid var(--border-color); border-radius: 8px; padding: 2px 6px;">
-                        <button class="action-btn" onclick="kurangiStok(${prod.id})" style="padding: 4px; border:none; background:transparent;">${iconMinus}</button>
-                        <span style="font-weight: 700; color: var(--stabilo-green); font-size: 1.1rem; min-width: 20px; text-align: center;">${prod.stok}</span>
-                        <button class="action-btn" onclick="tambahStok(${prod.id})" style="padding: 4px; border:none; background:transparent;">${iconPlus}</button>
-                    </div>
+                    <h4 style="color: var(--stabilo-green); font-size: 1.5rem; line-height: 1;">${prod.stok}</h4>
                 </div>
             </div>
             
@@ -412,8 +614,19 @@ function renderDaftarProdukKategori(kategoriTujuan) {
             </div>
             
             <div class="trx-actions" style="grid-template-columns: 1fr 1fr; margin-top: 16px;">
-                <button class="action-btn" onclick="bukaModalEditProduk(${prod.id})">${iconEdit} Edit</button>
+                <button class="action-btn" onclick="bukaModalTambahStok(${prod.id})" style="border-color: rgba(57,255,20,0.3); color: var(--stabilo-green);">${iconPlus} Tambah Stok</button>
+                <button class="action-btn" onclick="bukaModalKurangStok(${prod.id})" style="border-color: rgba(255,159,10,0.3); color: #ff9f0a;">${iconMinus} Kurangi Stok</button>
+                <button class="action-btn" onclick="bukaModalEditProduk(${prod.id})">${iconEdit} Edit Info</button>
                 <button class="action-btn btn-hapus" onclick="hapusProduk(${prod.id})">${iconDelete} Hapus</button>
+            </div>
+
+            <div style="margin-top: 12px; text-align: center;">
+                <button class="action-btn" style="width: 100%; justify-content: center; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); padding: 10px; border-radius: 8px;" onclick="toggleRiwayatProd(${prod.id})">
+                    ${iconHistory} Catatan Riwayat & Stok <svg id="icon-riwayat-prod-${prod.id}" width="16" height="16" style="transition: transform 0.3s ease; margin-left: auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+            </div>
+            <div id="riwayat-prod-${prod.id}" class="prod-history" style="display: none; margin-top: 12px; text-align: left; background-color: var(--bg-color); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
+                ${renderHTMLRiwayatProduk(prod.riwayat)}
             </div>
         `;
     list.appendChild(prodCard);
@@ -423,21 +636,6 @@ function renderDaftarProdukKategori(kategoriTujuan) {
 window.kembaliKeKategori = function () {
   currentKategoriView = null;
   renderProdukUI();
-}
-
-window.tambahStok = function (id) {
-  const prod = dataProduk.find(p => p.id === id);
-  if (prod) {
-    prod.stok++;
-    simpanDataProduk();
-  }
-}
-window.kurangiStok = function (id) {
-  const prod = dataProduk.find(p => p.id === id);
-  if (prod && prod.stok > 0) {
-    prod.stok--;
-    simpanDataProduk();
-  }
 }
 
 // PEMANGGILAN AWAL
@@ -454,31 +652,34 @@ function simpanData() {
   updateDashboard();
   if (typeof renderChart === 'function') renderChart();
 }
-
 function simpanDataProduk() {
   localStorage.setItem('produk_yuuki', JSON.stringify(dataProduk));
-  localStorage.setItem('kategori_yuuki', JSON.stringify(dataKategori)); // Menyimpan daftar kategori
+  localStorage.setItem('kategori_yuuki', JSON.stringify(dataKategori));
   renderProdukUI();
 }
-
 function tutupModal(idModal) {
   document.getElementById(idModal).classList.remove('active');
 }
 
-// --- LOGIKA MANAJEMEN PRODUK KUSTOM ---
+// --- LOGIKA MANAJEMEN PRODUK KUSTOM & AUDIT RIWAYAT ---
+function getWaktuSekarang() {
+  const now = new Date();
+  return {
+    tgl: now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }),
+    jam: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0')
+  };
+}
+
 window.bukaModalTambahKategori = function () {
   document.getElementById('modalTambahKategori').classList.add('active');
 }
 window.simpanKategoriBaru = function () {
   const inputKategori = document.getElementById('katNama').value.trim().toUpperCase();
   const namaKategori = inputKategori || 'UMUM';
-
-  // Jangan izinkan duplikat
   if (!dataKategori.includes(namaKategori)) {
     dataKategori.push(namaKategori);
     simpanDataProduk();
   }
-
   tutupModal('modalTambahKategori');
   document.getElementById('katNama').value = '';
 }
@@ -488,12 +689,15 @@ window.bukaModalTambahProduk = function () {
 }
 window.simpanProdukBaru = function () {
   const nama = document.getElementById('prodNama').value || 'Tanpa Nama';
-  const kategori = currentKategoriView || 'UMUM'; // Otomatis mengisi Kategori sesuai layar keranjang
+  const kategori = currentKategoriView || 'UMUM';
   const stok = parseInt(document.getElementById('prodStok').value) || 0;
   const beli = parseInt(document.getElementById('prodBeli').value) || 0;
   const jual = parseInt(document.getElementById('prodJual').value) || 0;
 
-  dataProduk.push({ id: Date.now(), nama, kategori, stok, hargaBeli: beli, hargaJual: jual });
+  const waktu = getWaktuSekarang();
+  const riwayatAwal = [{ id: Date.now(), tanggal: waktu.tgl, jam: waktu.jam, aksi: `Produk didaftarkan dengan stok awal: <b>${stok}</b>` }];
+
+  dataProduk.push({ id: Date.now(), nama, kategori, stok, hargaBeli: beli, hargaJual: jual, riwayat: riwayatAwal });
   simpanDataProduk();
   tutupModal('modalTambahProduk');
 
@@ -503,31 +707,108 @@ window.simpanProdukBaru = function () {
   document.getElementById('prodJual').value = '';
 }
 
+// TAMBAH STOK MODAL
+window.bukaModalTambahStok = function (id) {
+  const prod = dataProduk.find(p => p.id === id);
+  if (prod) {
+    document.getElementById('tambahStokId').value = prod.id;
+    document.getElementById('tambahStokNama').textContent = prod.nama;
+    document.getElementById('inputTambahStok').value = '';
+    document.getElementById('modalTambahStok').classList.add('active');
+  }
+}
+window.simpanTambahStok = function () {
+  const id = parseInt(document.getElementById('tambahStokId').value);
+  const qty = parseInt(document.getElementById('inputTambahStok').value);
+  if (isNaN(qty) || qty <= 0) return alert('Masukkan jumlah stok yang benar!');
+
+  const prodIndex = dataProduk.findIndex(p => p.id === id);
+  if (prodIndex !== -1) {
+    dataProduk[prodIndex].stok += qty;
+
+    const waktu = getWaktuSekarang();
+    dataProduk[prodIndex].riwayat.unshift({
+      id: Date.now(), tanggal: waktu.tgl, jam: waktu.jam,
+      aksi: `Stok <span style="color:var(--stabilo-green);">ditambah ${qty}</span> (Sisa: ${dataProduk[prodIndex].stok})`
+    });
+
+    simpanDataProduk();
+    tutupModal('modalTambahStok');
+  }
+}
+
+// KURANGI STOK MODAL
+window.bukaModalKurangStok = function (id) {
+  const prod = dataProduk.find(p => p.id === id);
+  if (prod) {
+    document.getElementById('kurangStokId').value = prod.id;
+    document.getElementById('kurangStokNama').textContent = prod.nama;
+    document.getElementById('inputKurangStok').value = '';
+    document.getElementById('modalKurangStok').classList.add('active');
+  }
+}
+window.simpanKurangStok = function () {
+  const id = parseInt(document.getElementById('kurangStokId').value);
+  const qty = parseInt(document.getElementById('inputKurangStok').value);
+  if (isNaN(qty) || qty <= 0) return alert('Masukkan jumlah stok yang benar!');
+
+  const prodIndex = dataProduk.findIndex(p => p.id === id);
+  if (prodIndex !== -1) {
+    if (dataProduk[prodIndex].stok < qty) return alert('Sisa stok tidak mencukupi!');
+    dataProduk[prodIndex].stok -= qty;
+
+    const waktu = getWaktuSekarang();
+    dataProduk[prodIndex].riwayat.unshift({
+      id: Date.now(), tanggal: waktu.tgl, jam: waktu.jam,
+      aksi: `Stok <span style="color:#ff9f0a;">dikurangi/terjual ${qty}</span> (Sisa: ${dataProduk[prodIndex].stok})`
+    });
+
+    simpanDataProduk();
+    tutupModal('modalKurangStok');
+  }
+}
+
+// EDIT PRODUK MODAL
 window.bukaModalEditProduk = function (id) {
   const prod = dataProduk.find(p => p.id === id);
   if (prod) {
     document.getElementById('editProdId').value = prod.id;
     document.getElementById('editProdNama').value = prod.nama;
-    document.getElementById('editProdStok').value = prod.stok;
     document.getElementById('editProdBeli').value = prod.hargaBeli;
     document.getElementById('editProdJual').value = prod.hargaJual;
     document.getElementById('modalEditProduk').classList.add('active');
   }
 }
-
 window.simpanEditProduk = function () {
   const id = parseInt(document.getElementById('editProdId').value);
   const index = dataProduk.findIndex(p => p.id === id);
+
   if (index !== -1) {
+    const oldProd = { ...dataProduk[index] };
+
     dataProduk[index].nama = document.getElementById('editProdNama').value || 'Tanpa Nama';
-    dataProduk[index].stok = parseInt(document.getElementById('editProdStok').value) || 0;
     dataProduk[index].hargaBeli = parseInt(document.getElementById('editProdBeli').value) || 0;
     dataProduk[index].hargaJual = parseInt(document.getElementById('editProdJual').value) || 0;
+
+    let catatanUbah = [];
+    if (oldProd.nama !== dataProduk[index].nama) catatanUbah.push(`Nama diubah ke "${dataProduk[index].nama}"`);
+    if (oldProd.hargaBeli !== dataProduk[index].hargaBeli) catatanUbah.push(`Modal diubah jadi ${formatRupiah(dataProduk[index].hargaBeli)}`);
+    if (oldProd.hargaJual !== dataProduk[index].hargaJual) catatanUbah.push(`Harga jual diubah jadi ${formatRupiah(dataProduk[index].hargaJual)}`);
+
+    if (catatanUbah.length > 0) {
+      const waktu = getWaktuSekarang();
+      dataProduk[index].riwayat.unshift({
+        id: Date.now(), tanggal: waktu.tgl, jam: waktu.jam,
+        aksi: `Informasi diedit: ` + catatanUbah.join(', ')
+      });
+    }
+
     simpanDataProduk();
     tutupModal('modalEditProduk');
   }
 }
 
+// HAPUS PRODUK
 let idProdukYangAkanDihapus = null;
 window.hapusProduk = function (id) {
   idProdukYangAkanDihapus = id;
@@ -542,12 +823,12 @@ window.konfirmasiHapusProduk = function () {
   }
 }
 
+// HAPUS SEMUA
 window.bukaModalHapusSemuaProduk = function () {
   if (dataKategori.length === 0 && dataProduk.length === 0) return alert('Katalog sudah kosong!');
   document.getElementById('modalHapusSemuaProduk').classList.add('active');
 }
 window.konfirmasiHapusSemuaProduk = function () {
-  // Bersihkan semua produk dan keranjangnya sampai akarnya
   dataProduk = [];
   dataKategori = [];
   simpanDataProduk();
@@ -559,7 +840,6 @@ window.konfirmasiHapusSemuaProduk = function () {
 // --- LOGIKA KALKULATOR DINAMIS ---
 let currentCalcInput = '0';
 const calcScreen = document.getElementById('calcScreen');
-
 window.tekanKalkulator = function (val) {
   if (!calcScreen) return;
   if (currentCalcInput === '0' && val !== '.' && val !== '*' && val !== '/' && val !== '+' && val !== '-') {
@@ -575,7 +855,6 @@ window.tekanKalkulator = function (val) {
   }
   updateLayarKalkulator();
 }
-
 window.hitungKalkulator = function () {
   if (!calcScreen) return;
   try {
@@ -585,29 +864,20 @@ window.hitungKalkulator = function () {
     updateLayarKalkulator();
   } catch (e) {
     calcScreen.textContent = 'Error';
-    setTimeout(() => {
-      currentCalcInput = '0';
-      updateLayarKalkulator();
-    }, 1000);
+    setTimeout(() => { currentCalcInput = '0'; updateLayarKalkulator(); }, 1000);
   }
 }
-
 window.hapusKalkulator = function () {
   if (!calcScreen) return;
   currentCalcInput = '0';
   updateLayarKalkulator();
 }
-
 window.hapusSatuKalkulator = function () {
   if (!calcScreen) return;
-  if (currentCalcInput.length > 1) {
-    currentCalcInput = currentCalcInput.slice(0, -1);
-  } else {
-    currentCalcInput = '0';
-  }
+  if (currentCalcInput.length > 1) { currentCalcInput = currentCalcInput.slice(0, -1); }
+  else { currentCalcInput = '0'; }
   updateLayarKalkulator();
 }
-
 function updateLayarKalkulator() {
   calcScreen.textContent = currentCalcInput.replace(/\*/g, '×').replace(/\//g, '÷');
 }
