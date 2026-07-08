@@ -738,6 +738,7 @@ window.konfirmasiHapusLaporan = function () {
   if (idLaporanYangAkanDihapus !== null) { dataLaporan = dataLaporan.filter(l => l.id !== idLaporanYangAkanDihapus); localStorage.setItem('laporan_yuuki', JSON.stringify(dataLaporan)); renderLaporan(); if (typeof renderChart === 'function') renderChart(); idLaporanYangAkanDihapus = null; tutupModal('modalHapusLaporan'); }
 }
 
+
 // ==========================================
 // 11. SISTEM INJEKSI RENDER OTOMATIS (SAFE GATE)
 // ==========================================
