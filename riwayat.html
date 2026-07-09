@@ -85,24 +85,40 @@
 
     <div id="transactionModal" class="modal-overlay">
       <div class="modal-card">
-        <h3>Input Transaksi</h3>
+        <h3>Tambah Transaksi</h3>
+
         <div class="form-group">
-          <label>Nama Barang</label>
-          <input type="text" id="inputNama" placeholder="Contoh: Pulsa Tsel 50k" autocomplete="off">
+          <label>Ambil dari Katalog Produk</label>
+          <select id="selectProduk" onchange="autoFillTransaksi()"
+            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-main); font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; margin-bottom: 4px;">
+            <option value="" style="background-color: var(--bg-color); color: var(--text-main);">-- Ketik Manual / Pilih
+              Produk --</option>
+          </select>
         </div>
+
+        <div class="form-group">
+          <label>Nama Barang / Layanan</label>
+          <input type="text" id="inputNama" placeholder="Contoh: Aksesoris HP" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label>Jumlah / Pcs</label>
+          <input type="number" id="inputQty" value="1" min="1" oninput="kalkulasiTotalTransaksi()">
+        </div>
+
         <div class="form-grid">
           <div class="form-group">
-            <label>Harga Beli (Modal)</label>
+            <label>Total Harga Modal</label>
             <input type="number" id="inputBeli" placeholder="0">
           </div>
           <div class="form-group">
-            <label>Harga Jual</label>
+            <label>Total Harga Jual</label>
             <input type="number" id="inputJual" placeholder="0">
           </div>
         </div>
         <div class="modal-actions">
-          <button id="btnBatal" class="modal-btn cancel-btn">Batal</button>
-          <button id="btnTambah" class="modal-btn submit-btn">Tambah</button>
+          <button class="modal-btn cancel-btn" id="btnBatal">Batal</button>
+          <button class="modal-btn submit-btn" id="btnTambah">Simpan</button>
         </div>
       </div>
     </div>

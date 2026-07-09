@@ -68,7 +68,7 @@ if (dataKategori.length === 0 && dataProduk.length > 0) {
 }
 
 // ==========================================
-// 3. IKON SVG MODERN (FIXED FILL NONE)
+// 3. IKON SVG MODERN
 // ==========================================
 const iconEdit = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
 const iconDelete = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
@@ -98,7 +98,7 @@ function updateDashboard() {
 
   dataFaktur.forEach(fak => {
     totalPenjualan += fak.grandTotal;
-    totalLaba += fak.grandTotal;
+    totalLaba += fak.grandTotal; // Margin laba untuk faktur adalah 100% jika modal tidak ditulis detail
   });
 
   const isVisible = localStorage.getItem('saldo_visible') !== 'false';
@@ -126,7 +126,7 @@ if (btnToggleSaldo) {
 }
 
 // ==========================================
-// 5. FITUR GRAFIK (CHART.JS 30 HARI)
+// 5. FITUR GRAFIK (CHART.JS)
 // ==========================================
 let profitChartInstance = null;
 window.renderChart = function () {
@@ -219,8 +219,8 @@ function renderDaftarTransaksi() {
             </div>
             <div id="riwayat-detail-${trx.id}" style="display: none; padding-top: 10px;">
                 <div class="trx-details">
-                    <div class="trx-detail-item"><p>Harga Beli</p><h4>${formatRupiah(trx.hargaBeli)}</h4></div>
-                    <div class="trx-detail-item"><p>Harga Jual</p><h4>${formatRupiah(trx.hargaJual)}</h4></div>
+                    <div class="trx-detail-item"><p>Harga Beli Total</p><h4>${formatRupiah(trx.hargaBeli)}</h4></div>
+                    <div class="trx-detail-item"><p>Harga Jual Total</p><h4>${formatRupiah(trx.hargaJual)}</h4></div>
                 </div>
                 <div class="trx-profit" style="margin-top: 12px;"><p>Keuntungan</p><h4>${formatRupiah(keuntungan)}</h4></div>
                 ${statusHtml}
@@ -432,7 +432,7 @@ window.simpanProdukBaru = function () {
   const nama = document.getElementById('prodNama').value || 'Tanpa Nama', kategori = currentKategoriView || 'UMUM';
   const stok = parseInt(document.getElementById('prodStok').value) || 0, beli = parseInt(document.getElementById('prodBeli').value) || 0, jual = parseInt(document.getElementById('prodJual').value) || 0;
   const w = getWaktuSekarang();
-  const r = [{ id: Date.now(), tanggal: w.tgl, jam: w.jam, aksi: `Produk didaftarkan dengan stok awal: <b>${stok}</b>` }];
+  const r = [{ id: Date.now(), tanggal: w.tgl, jam: w.jam, aksi: `Produk didaftarkan dgn stok awal: <b>${stok}</b>` }];
   dataProduk.push({ id: Date.now(), nama, kategori, stok, hargaBeli: beli, hargaJual: jual, riwayat: r });
   simpanDataProduk(); tutupModal('modalTambahProduk');
   document.getElementById('prodNama').value = ''; document.getElementById('prodStok').value = ''; document.getElementById('prodBeli').value = ''; document.getElementById('prodJual').value = '';
@@ -462,7 +462,7 @@ window.simpanKurangStok = function () {
   if (idx !== -1) {
     if (dataProduk[idx].stok < qty) return alert('Stok tidak cukup!');
     dataProduk[idx].stok -= qty; const w = getWaktuSekarang();
-    dataProduk[idx].riwayat.unshift({ id: Date.now(), tanggal: w.tgl, jam: w.jam, aksi: `Stok <span style="color:#ff9f0a;">dikurangi ${qty}</span> (Sisa: ${dataProduk[idx].stok})` });
+    dataProduk[idx].riwayat.unshift({ id: Date.now(), tanggal: w.tgl, jam: w.jam, aksi: `Stok <span style="color:#ff9f0a;">dikurangi manual ${qty}</span> (Sisa: ${dataProduk[idx].stok})` });
     simpanDataProduk(); tutupModal('modalKurangStok');
   }
 }
@@ -592,17 +592,13 @@ window.downloadPDF = function (id) {
   const printContent = `
         <div style="background: #ffffff; color: #121212; width: 100%; padding: 40px; box-sizing: border-box; font-family: Arial, sans-serif;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 4px solid #39FF14; padding-bottom: 24px; margin-bottom: 32px;">
-    <div>
-        <h1 style="margin: 0; font-size: 38px; font-weight: 900; color: #121212;">YUUKI CELL</h1>
-        <p style="margin:6px 0 0 0; font-size:15px; color:#555;">Mitra Agen PPOB, Gedget & Aksesoris</p>
-        <p style="margin:2px 0 0 0; font-size:15px; color:#555;">Telp: 0851-7344-9016</p>
-    </div>
-    <div style="text-align: right;">
-        <h2 style="margin:0; font-size:32px; color:#39FF14; text-transform:uppercase;">Faktur</h2>
-        <p style="margin:8px 0 0 0; font-weight:700;">INV-${f.id}</p>
-        <p style="margin:4px 0 0 0; color:#666;">${f.tanggalStr}</p>
-    </div>
-</div>
+                <div>
+                    <h1 style="margin: 0; font-size: 38px; font-weight: 900; color: #121212;">YUUKI CELL</h1>
+                    <p style="margin:6px 0 0 0; font-size:15px; color:#555;">Mitra Agen PPOB, Gedget & Aksesoris</p>
+                    <p style="margin:2px 0 0 0; font-size:15px; color:#555;">Telp: 0851-7344-9016</p>
+                </div>
+                <div style="text-align: right;"><h2 style="margin:0; font-size:32px; color:#39FF14; text-transform:uppercase;">Faktur</h2><p style="margin:8px 0 0 0; font-weight:700;">INV-${f.id}</p><p style="margin:4px 0 0 0; color:#666;">${f.tanggalStr}</p></div>
+            </div>
             <div style="margin-bottom: 36px;"><p style="font-size:13px; font-weight:700; color:#888; text-transform:uppercase;">Ditagihkan Kepada:</p><p style="margin:6px 0 0 0; font-size:20px; font-weight:700;">${f.pembeli}</p></div>
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 36px;">
                 <thead><tr style="background-color:#f4f4f5; border-bottom:2px solid #121212;"><th style="padding:14px 12px; text-align:left; font-size:14px; width:8%;">No</th><th style="padding:14px 12px; text-align:left; font-size:14px; width:62%;">Barang/Layanan</th><th style="padding:14px 12px; text-align:right; font-size:14px; width:30%;">Harga</th></tr></thead>
@@ -623,6 +619,7 @@ window.downloadPDF = function (id) {
 // ==========================================
 let currentCalcInput = '0';
 window.tekanKalkulator = function (val) {
+  const calcScreen = document.getElementById('calcScreen'); if (!calcScreen) return;
   if (currentCalcInput === '0' && val !== '.' && val !== '*' && val !== '/' && val !== '+' && val !== '-') { currentCalcInput = val; }
   else {
     const lastChar = currentCalcInput.slice(-1), isOp = (char) => ['+', '-', '*', '/'].includes(char);
@@ -652,24 +649,103 @@ function updateLayarKalkulator() {
 }
 
 // ==========================================
-// 10. OPERASI KASIR CORE (TAMBAH, EDIT, EKSPOR)
+// 10. OPERASI KASIR TERINTEGRASI KATALOG
 // ==========================================
 function simpanData() { localStorage.setItem('riwayat_yuuki', JSON.stringify(dataTransaksi)); renderDaftarTransaksi(); updateDashboard(); if (typeof renderChart === 'function') renderChart(); }
 function tutupModal(idModal) { const m = document.getElementById(idModal); if (m) m.classList.remove('active'); }
 
+// Variabel Penyimpanan Harga Satuan dari Katalog
+let tempHargaBeliSatuan = 0;
+let tempHargaJualSatuan = 0;
+
+// Otomatis Mengisi Harga saat Produk dipilih dari Dropdown
+window.autoFillTransaksi = function () {
+  const selectId = document.getElementById('selectProduk').value;
+  if (selectId) {
+    const prod = dataProduk.find(p => p.id === parseInt(selectId));
+    if (prod) {
+      document.getElementById('inputNama').value = prod.nama;
+      tempHargaBeliSatuan = prod.hargaBeli;
+      tempHargaJualSatuan = prod.hargaJual;
+      document.getElementById('inputQty').value = 1; // Reset jumlah ke 1
+      kalkulasiTotalTransaksi(); // Hitung totalnya
+    }
+  } else {
+    document.getElementById('inputNama').value = '';
+    document.getElementById('inputBeli').value = '';
+    document.getElementById('inputJual').value = '';
+    tempHargaBeliSatuan = 0;
+    tempHargaJualSatuan = 0;
+    document.getElementById('inputQty').value = 1;
+  }
+}
+
+// Menghitung Ulang Harga Total jika Qty diubah
+window.kalkulasiTotalTransaksi = function () {
+  const qty = parseInt(document.getElementById('inputQty').value) || 1;
+  // Hanya otomatis dikali jika mengambil barang dari Katalog (Dropdown dipilih)
+  if (document.getElementById('selectProduk') && document.getElementById('selectProduk').value) {
+    document.getElementById('inputBeli').value = tempHargaBeliSatuan * qty;
+    document.getElementById('inputJual').value = tempHargaJualSatuan * qty;
+  }
+}
+
 const btnTransaksiBaru = document.getElementById('btnTransaksiBaru');
 if (btnTransaksiBaru) {
-  btnTransaksiBaru.addEventListener('click', () => document.getElementById('transactionModal').classList.add('active'));
+  btnTransaksiBaru.addEventListener('click', () => {
+    const select = document.getElementById('selectProduk');
+    if (select) {
+      select.innerHTML = '<option value="" style="background-color: var(--bg-color); color: var(--text-main);">-- Ketik Manual / Pilih Produk --</option>';
+      dataProduk.forEach(p => {
+        if (p.stok > 0) {
+          select.innerHTML += `<option value="${p.id}" style="background-color: var(--bg-color); color: var(--text-main);">${p.nama} (Sisa Stok: ${p.stok})</option>`;
+        } else {
+          select.innerHTML += `<option value="${p.id}" disabled style="background-color: var(--bg-color); color: var(--text-muted);">${p.nama} (Habis!)</option>`;
+        }
+      });
+      select.value = '';
+    }
+    document.getElementById('inputQty').value = 1; // Reset Qty
+    tempHargaBeliSatuan = 0;
+    tempHargaJualSatuan = 0;
+    document.getElementById('transactionModal').classList.add('active');
+  });
+
   document.getElementById('btnBatal').addEventListener('click', () => tutupModal('transactionModal'));
+
   document.getElementById('btnTambah').addEventListener('click', () => {
-    const now = new Date(), trxBaru = {
-      id: Date.now(), nama: document.getElementById('inputNama').value || 'Tanpa Nama',
-      hargaBeli: parseInt(document.getElementById('inputBeli').value) || 0, hargaJual: parseInt(document.getElementById('inputJual').value) || 0,
+    const selectVal = document.getElementById('selectProduk') ? document.getElementById('selectProduk').value : '';
+    const qty = parseInt(document.getElementById('inputQty').value) || 1;
+    const nama = document.getElementById('inputNama').value || 'Tanpa Nama';
+    const beli = parseInt(document.getElementById('inputBeli').value) || 0;
+    const jual = parseInt(document.getElementById('inputJual').value) || 0;
+
+    // LOGIKA INTEGRASI: POTONG STOK & CATAT RIWAYAT DENGAN JUMLAH YANG TEPAT
+    if (selectVal) {
+      const prodIndex = dataProduk.findIndex(p => p.id === parseInt(selectVal));
+      if (prodIndex !== -1) {
+        if (dataProduk[prodIndex].stok < qty) return alert(`Gagal! Sisa stok hanya ${dataProduk[prodIndex].stok}. Kurangi jumlah atau tambah stok dulu.`);
+
+        dataProduk[prodIndex].stok -= qty;
+        const w = getWaktuSekarang();
+        dataProduk[prodIndex].riwayat.unshift({
+          id: Date.now(), tanggal: w.tgl, jam: w.jam,
+          aksi: `Terjual ${qty} via Transaksi (Sisa Stok: ${dataProduk[prodIndex].stok})`
+        });
+        localStorage.setItem('produk_yuuki', JSON.stringify(dataProduk));
+      }
+    }
+
+    const now = new Date();
+    const trxBaru = {
+      id: Date.now(), nama: nama, hargaBeli: beli, hargaJual: jual,
       tanggal: now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }),
       jam: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'), status: 'normal'
     };
     dataTransaksi.push(trxBaru); simpanData(); tutupModal('transactionModal');
+
     document.getElementById('inputNama').value = ''; document.getElementById('inputBeli').value = ''; document.getElementById('inputJual').value = '';
+    if (document.getElementById('selectProduk')) document.getElementById('selectProduk').value = '';
   });
 }
 
@@ -738,9 +814,8 @@ window.konfirmasiHapusLaporan = function () {
   if (idLaporanYangAkanDihapus !== null) { dataLaporan = dataLaporan.filter(l => l.id !== idLaporanYangAkanDihapus); localStorage.setItem('laporan_yuuki', JSON.stringify(dataLaporan)); renderLaporan(); if (typeof renderChart === 'function') renderChart(); idLaporanYangAkanDihapus = null; tutupModal('modalHapusLaporan'); }
 }
 
-
 // ==========================================
-// 11. SISTEM INJEKSI RENDER OTOMATIS (SAFE GATE)
+// 11. SISTEM INJEKSI RENDER OTOMATIS
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   updateDateTime();
