@@ -98,7 +98,7 @@ function updateDashboard() {
 
   dataFaktur.forEach(fak => {
     totalPenjualan += fak.grandTotal;
-    totalLaba += fak.grandTotal; // Margin laba untuk faktur adalah 100% jika modal tidak ditulis detail
+    totalLaba += fak.grandTotal;
   });
 
   const isVisible = localStorage.getItem('saldo_visible') !== 'false';
@@ -201,17 +201,24 @@ function renderDaftarTransaksi() {
     trxCard.classList.add('trx-card');
 
     let statusHtml = '', tombolHutang = `<button class="action-btn" onclick="bukaModalHutang(${trx.id})">${iconBook} Hutang</button>`;
+    let badgeStatus = ''; // Badge Indikator Status
+
     if (trx.status === 'hutang') {
+      badgeStatus = `<span style="background: rgba(255,59,48,0.1); color: #ff3b30; border: 1px solid #ff3b30; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold;">HUTANG</span>`;
       statusHtml = `<div class="status-box hutang"><p class="title">BELUM LUNAS (A/n: ${trx.namaPenghutang})</p></div>`;
       tombolHutang = `<button class="action-btn btn-lunas" onclick="bukaModalLunas(${trx.id})">${iconCheck} Lunaskan</button>`;
     } else if (trx.status === 'lunas') {
+      badgeStatus = `<span style="background: rgba(57,255,20,0.1); color: var(--stabilo-green); border: 1px solid var(--stabilo-green); font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold;">LUNAS</span>`;
       statusHtml = `<div class="status-box lunas"><p class="title">LUNAS (A/n: ${trx.namaPenghutang})</p><p class="time">${trx.waktuLunas}</p></div>`;
       tombolHutang = `<button class="action-btn" disabled>${iconCheck} Selesai</button>`;
     }
 
     trxCard.innerHTML = `
             <div class="trx-header" style="border-bottom: 2px solid var(--stabilo-green); padding-bottom: 12px; cursor: pointer;" onclick="toggleRiwayat(${trx.id})">
-                <span class="trx-name" style="color: var(--stabilo-green); font-size: 1.1rem;">${trx.nama}</span>
+                <div style="display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap;">
+                    <span class="trx-name" style="color: var(--stabilo-green); font-size: 1.1rem; line-height: 1;">${trx.nama}</span>
+                    ${badgeStatus}
+                </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span class="trx-date" style="font-size: 0.75rem;">${trx.tanggal} • ${trx.jam}</span>
                     <svg id="icon-riwayat-toggle-${trx.id}" style="transition: transform 0.3s ease; color: var(--text-main);" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -259,11 +266,11 @@ function renderLaporan() {
     lapCard.classList.add('trx-card');
     lapCard.innerHTML = `
             <div class="trx-header" style="border-bottom: 2px solid var(--stabilo-green); padding-bottom: 12px; cursor: pointer;" onclick="toggleLaporan(${lap.id})">
-                <span class="trx-name" style="color: var(--stabilo-green);">Trans: ${lap.tanggalTransaksi}</span>
+                <span class="trx-name" style="color: var(--stabilo-green);">Ekspor: ${lap.tanggalTransaksi}</span>
                 <svg id="icon-toggle-${lap.id}" style="transition: transform 0.3s ease; color: var(--text-main);" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </div>
             <div id="laporan-detail-${lap.id}" style="display: none; padding-top: 10px;">
-                <div style="margin-bottom: 12px;"><p style="font-size: 0.75rem; color: var(--text-muted);"><strong style="color: var(--text-main);">Waktu Tutup Kasir:</strong><br> ${lap.waktuEkspor}</p></div>
+                <div style="margin-bottom: 12px;"><p style="font-size: 0.75rem; color: var(--text-muted);"><strong style="color: var(--text-main);">Waktu Ekspor:</strong><br> ${lap.waktuEkspor}</p></div>
                 <div class="trx-details">
                     <div class="trx-detail-item"><p>Total Modal</p><h4>${formatRupiah(lap.totalModal)}</h4></div>
                     <div class="trx-detail-item"><p>Total Jual</p><h4>${formatRupiah(lap.totalJual)}</h4></div>
@@ -447,7 +454,7 @@ window.simpanTambahStok = function () {
   const idx = dataProduk.findIndex(x => x.id === id);
   if (idx !== -1) {
     dataProduk[idx].stok += qty; const w = getWaktuSekarang();
-    dataProduk[idx].riwayat.unshift({ id: Date.now(), tanggal: w.tgl, jam: w.jam, aksi: `Stok <span style="color:var(--stabilo-green);">ditambah ${qty}</span> (Sisa: ${dataProduk[idx].stok})` });
+    dataProduk[idx].riwayat.unshift({ id: Date.now(), tanggal: w.tgl, jam: w.jam, aksi: `Stok <span style="color:var(--stabilo-green);">ditambah manual ${qty}</span> (Sisa: ${dataProduk[idx].stok})` });
     simpanDataProduk(); tutupModal('modalTambahStok');
   }
 }
@@ -649,16 +656,14 @@ function updateLayarKalkulator() {
 }
 
 // ==========================================
-// 10. OPERASI KASIR TERINTEGRASI KATALOG
+// 10. OPERASI KASIR TERINTEGRASI KATALOG & REFUND
 // ==========================================
 function simpanData() { localStorage.setItem('riwayat_yuuki', JSON.stringify(dataTransaksi)); renderDaftarTransaksi(); updateDashboard(); if (typeof renderChart === 'function') renderChart(); }
 function tutupModal(idModal) { const m = document.getElementById(idModal); if (m) m.classList.remove('active'); }
 
-// Variabel Penyimpanan Harga Satuan dari Katalog
 let tempHargaBeliSatuan = 0;
 let tempHargaJualSatuan = 0;
 
-// Otomatis Mengisi Harga saat Produk dipilih dari Dropdown
 window.autoFillTransaksi = function () {
   const selectId = document.getElementById('selectProduk').value;
   if (selectId) {
@@ -667,8 +672,8 @@ window.autoFillTransaksi = function () {
       document.getElementById('inputNama').value = prod.nama;
       tempHargaBeliSatuan = prod.hargaBeli;
       tempHargaJualSatuan = prod.hargaJual;
-      document.getElementById('inputQty').value = 1; // Reset jumlah ke 1
-      kalkulasiTotalTransaksi(); // Hitung totalnya
+      document.getElementById('inputQty').value = 1;
+      kalkulasiTotalTransaksi();
     }
   } else {
     document.getElementById('inputNama').value = '';
@@ -680,10 +685,8 @@ window.autoFillTransaksi = function () {
   }
 }
 
-// Menghitung Ulang Harga Total jika Qty diubah
 window.kalkulasiTotalTransaksi = function () {
   const qty = parseInt(document.getElementById('inputQty').value) || 1;
-  // Hanya otomatis dikali jika mengambil barang dari Katalog (Dropdown dipilih)
   if (document.getElementById('selectProduk') && document.getElementById('selectProduk').value) {
     document.getElementById('inputBeli').value = tempHargaBeliSatuan * qty;
     document.getElementById('inputJual').value = tempHargaJualSatuan * qty;
@@ -705,7 +708,7 @@ if (btnTransaksiBaru) {
       });
       select.value = '';
     }
-    document.getElementById('inputQty').value = 1; // Reset Qty
+    document.getElementById('inputQty').value = 1;
     tempHargaBeliSatuan = 0;
     tempHargaJualSatuan = 0;
     document.getElementById('transactionModal').classList.add('active');
@@ -720,13 +723,15 @@ if (btnTransaksiBaru) {
     const beli = parseInt(document.getElementById('inputBeli').value) || 0;
     const jual = parseInt(document.getElementById('inputJual').value) || 0;
 
-    // LOGIKA INTEGRASI: POTONG STOK & CATAT RIWAYAT DENGAN JUMLAH YANG TEPAT
+    let linkedProductId = null;
+
     if (selectVal) {
       const prodIndex = dataProduk.findIndex(p => p.id === parseInt(selectVal));
       if (prodIndex !== -1) {
-        if (dataProduk[prodIndex].stok < qty) return alert(`Gagal! Sisa stok hanya ${dataProduk[prodIndex].stok}. Kurangi jumlah atau tambah stok dulu.`);
+        if (dataProduk[prodIndex].stok < qty) return alert(`Gagal! Sisa stok hanya ${dataProduk[prodIndex].stok}.`);
 
         dataProduk[prodIndex].stok -= qty;
+        linkedProductId = dataProduk[prodIndex].id; // Tandai bahwa transaksi ini memotong stok ID ini
         const w = getWaktuSekarang();
         dataProduk[prodIndex].riwayat.unshift({
           id: Date.now(), tanggal: w.tgl, jam: w.jam,
@@ -740,7 +745,10 @@ if (btnTransaksiBaru) {
     const trxBaru = {
       id: Date.now(), nama: nama, hargaBeli: beli, hargaJual: jual,
       tanggal: now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }),
-      jam: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'), status: 'normal'
+      jam: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'),
+      status: 'normal',
+      productId: linkedProductId, // Disimpan ke riwayat agar bisa di-refund jika dihapus
+      qty: qty // Ingat berapa jumlahnya
     };
     dataTransaksi.push(trxBaru); simpanData(); tutupModal('transactionModal');
 
@@ -751,7 +759,32 @@ if (btnTransaksiBaru) {
 
 let idYangAkanDihapus = null;
 window.hapusTransaksi = function (id) { idYangAkanDihapus = id; document.getElementById('modalHapus').classList.add('active'); }
-window.konfirmasiHapus = function () { if (idYangAkanDihapus !== null) { dataTransaksi = dataTransaksi.filter(trx => trx.id !== idYangAkanDihapus); simpanData(); idYangAkanDihapus = null; tutupModal('modalHapus'); } }
+window.konfirmasiHapus = function () {
+  if (idYangAkanDihapus !== null) {
+    // CEK APAKAH TRANSAKSI INI MENGGUNAKAN STOK KATALOG (FITUR REFUND STOK)
+    const trx = dataTransaksi.find(t => t.id === idYangAkanDihapus);
+    if (trx && trx.productId) {
+      const prodIndex = dataProduk.findIndex(p => p.id === trx.productId);
+      if (prodIndex !== -1) {
+        dataProduk[prodIndex].stok += (trx.qty || 1); // Kembalikan stoknya
+        const w = getWaktuSekarang();
+        dataProduk[prodIndex].riwayat.unshift({
+          id: Date.now(), tanggal: w.tgl, jam: w.jam,
+          aksi: `Trans. Dihapus, stok kembali: <span style="color:var(--stabilo-green);">+${trx.qty || 1}</span> (Sisa: ${dataProduk[prodIndex].stok})`
+        });
+        localStorage.setItem('produk_yuuki', JSON.stringify(dataProduk));
+        if (typeof renderProdukUI === 'function') renderProdukUI(); // Refresh katalog
+      }
+    }
+
+    // Baru Hapus Transaksinya
+    dataTransaksi = dataTransaksi.filter(t => t.id !== idYangAkanDihapus);
+    simpanData();
+    idYangAkanDihapus = null;
+    tutupModal('modalHapus');
+  }
+}
+
 window.bukaModalEdit = function (id) {
   const trx = dataTransaksi.find(t => t.id === id);
   if (trx) {
@@ -785,26 +818,38 @@ window.simpanLunas = function () {
 }
 window.bukaModalEkspor = function () { document.getElementById('modalEkspor').classList.add('active'); }
 window.prosesEkspor = function () {
-  const now = new Date(), todayStr = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
-  const waktuEkspor = todayStr + ' • ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-  const dataHariIni = dataTransaksi.filter(trx => trx.tanggal === todayStr);
-  if (dataHariIni.length === 0) { alert('Data kosong untuk hari ini.'); tutupModal('modalEkspor'); return; }
+  const w = getWaktuSekarang();
+  const waktuEkspor = w.tgl + ' • ' + w.jam;
+
+  // Tarik SEMUA data yang belum diekspor
+  if (dataTransaksi.length === 0) { alert('Data kosong. Belum ada transaksi.'); tutupModal('modalEkspor'); return; }
+
   let totalModal = 0, totalJual = 0, totalLaba = 0;
-  dataHariIni.forEach(trx => { totalModal += trx.hargaBeli; totalJual += trx.hargaJual; totalLaba += (trx.hargaJual - trx.hargaBeli); });
-  dataLaporan.push({ id: Date.now(), tanggalTransaksi: todayStr, waktuEkspor: waktuEkspor, totalModal, totalJual, totalLaba, detailTransaksi: dataHariIni });
+  dataTransaksi.forEach(trx => { totalModal += trx.hargaBeli; totalJual += trx.hargaJual; totalLaba += (trx.hargaJual - trx.hargaBeli); });
+
+  dataLaporan.push({
+    id: Date.now(),
+    tanggalTransaksi: w.tgl,
+    waktuEkspor: waktuEkspor,
+    totalModal, totalJual, totalLaba,
+    detailTransaksi: [...dataTransaksi] // Copy semua transaksi ke laporan
+  });
+
   localStorage.setItem('laporan_yuuki', JSON.stringify(dataLaporan));
-  dataTransaksi = dataTransaksi.filter(trx => trx.tanggal !== todayStr); simpanData();
+  dataTransaksi = []; // Kosongkan layar utama karena sudah masuk riwayat laporan
+  simpanData();
   tutupModal('modalEkspor'); window.location.href = 'laporan.html';
 }
+
 window.bukaModalDownload = function (id) { document.getElementById('downloadLaporanId').value = id; document.getElementById('modalDownloadLaporan').classList.add('active'); }
 window.konfirmasiDownloadLaporan = function () {
   const id = parseInt(document.getElementById('downloadLaporanId').value), lap = dataLaporan.find(l => l.id === id);
   if (lap) {
-    let tableHTML = `<table border="1"><thead><tr><th>ID</th><th>Tanggal</th><th>Jam</th><th>Nama Barang</th><th>Modal</th><th>Harga Jual</th><th>Untung</th><th>Status</th></tr></thead><tbody>`;
+    let tableHTML = `<table border="1"><thead><tr><th>ID</th><th>Tgl Transaksi</th><th>Jam Transaksi</th><th>Nama Barang</th><th>Modal</th><th>Harga Jual</th><th>Untung</th><th>Status</th></tr></thead><tbody>`;
     lap.detailTransaksi.forEach(trx => { tableHTML += `<tr><td>${trx.id}</td><td>${trx.tanggal}</td><td>${trx.jam}</td><td>${trx.nama}</td><td>${trx.hargaBeli}</td><td>${trx.hargaJual}</td><td>${trx.hargaJual - trx.hargaBeli}</td><td>${trx.status}</td></tr>`; });
     tableHTML += `</tbody></table>`;
     const blob = new Blob([tableHTML], { type: 'application/vnd.ms-excel' }), url = URL.createObjectURL(blob), a = document.createElement('a');
-    a.href = url; a.download = `Laporan_YuukiCell_${lap.tanggalTransaksi.replace(/ /g, '_')}.xls`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    a.href = url; a.download = `Laporan_Ekspor_${lap.tanggalTransaksi.replace(/ /g, '_')}.xls`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
   }
   tutupModal('modalDownloadLaporan');
 }
