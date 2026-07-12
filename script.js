@@ -135,11 +135,12 @@ window.renderChart = function () {
 
   let profitByDate = {};
   dataLaporan.forEach(lap => {
+    // Ambil data totalLaba dari laporan, kumpulkan berdasarkan tanggal
     profitByDate[lap.tanggalTransaksi] = (profitByDate[lap.tanggalTransaksi] || 0) + lap.totalLaba;
   });
 
   let labels = Object.keys(profitByDate);
-  if (labels.length > 30) labels = labels.slice(labels.length - 30);
+  if (labels.length > 30) labels = labels.slice(labels.length - 30); // Batas 30 hari
 
   let displayLabels = labels.map(label => label.includes(',') ? label.split(',')[1].trim().replace(/ \d{4}$/, '') : label);
   let dataPoints = labels.map(date => profitByDate[date]);
@@ -195,13 +196,26 @@ function renderDaftarTransaksi() {
     return;
   }
 
+  // TOMBOL HAPUS SEMUA TRANSAKSI OTOMATIS
+  const btnKosongkan = document.createElement('button');
+  btnKosongkan.className = 'menu-btn outline-btn';
+  btnKosongkan.style.cssText = 'width: 100%; flex-direction: row; justify-content: center; gap: 8px; padding: 12px; color: #ff3b30; border-color: rgba(255, 59, 48, 0.3); margin-bottom: 16px; border-radius: 8px; font-weight: bold; cursor: pointer;';
+  btnKosongkan.innerHTML = `<svg style="width:18px; height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Hapus Semua Transaksi`;
+  btnKosongkan.onclick = () => {
+    if (confirm("PERINGATAN: Yakin ingin menghapus seluruh transaksi yang belum diekspor? Data akan hilang permanen!")) {
+      dataTransaksi = [];
+      simpanData();
+    }
+  };
+  transactionList.appendChild(btnKosongkan);
+
   [...dataTransaksi].reverse().forEach(trx => {
     const keuntungan = trx.hargaJual - trx.hargaBeli;
     const trxCard = document.createElement('div');
     trxCard.classList.add('trx-card');
 
     let statusHtml = '', tombolHutang = `<button class="action-btn" onclick="bukaModalHutang(${trx.id})">${iconBook} Hutang</button>`;
-    let badgeStatus = ''; // Badge Indikator Status
+    let badgeStatus = '';
 
     if (trx.status === 'hutang') {
       badgeStatus = `<span style="background: rgba(255,59,48,0.1); color: #ff3b30; border: 1px solid #ff3b30; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold;">HUTANG</span>`;
@@ -251,17 +265,46 @@ window.toggleLaporan = function (id) {
   }
 }
 
+// PERBAIKAN: Fungsi Laporan agar nilai Total Keseluruhan tidak Rp 0
 function renderLaporan() {
   const laporanList = document.getElementById('laporanList');
+  const elGrandJual = document.getElementById('grandTotalJual');
+  const elGrandModal = document.getElementById('grandTotalModal');
+  const elGrandLaba = document.getElementById('grandTotalLaba');
   if (!laporanList) return;
   laporanList.innerHTML = '';
 
+  let grandJual = 0, grandModal = 0, grandLaba = 0;
+
   if (dataLaporan.length === 0) {
     laporanList.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Belum ada laporan yang diekspor.</p>`;
+    if (elGrandJual) elGrandJual.textContent = 'Rp 0';
+    if (elGrandModal) elGrandModal.textContent = 'Rp 0';
+    if (elGrandLaba) elGrandLaba.textContent = 'Rp 0';
     return;
   }
 
+  // TOMBOL HAPUS SEMUA LAPORAN OTOMATIS
+  const btnKosongkanLap = document.createElement('button');
+  btnKosongkanLap.className = 'menu-btn outline-btn';
+  btnKosongkanLap.style.cssText = 'width: 100%; flex-direction: row; justify-content: center; gap: 8px; padding: 12px; color: #ff3b30; border-color: rgba(255, 59, 48, 0.3); margin-bottom: 16px; border-radius: 8px; font-weight: bold; cursor: pointer;';
+  btnKosongkanLap.innerHTML = `<svg style="width:18px; height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Hapus Semua Laporan Harian`;
+  btnKosongkanLap.onclick = () => {
+    if (confirm("PERINGATAN: Yakin ingin menghapus seluruh Laporan Harian yang tersimpan?")) {
+      dataLaporan = [];
+      localStorage.setItem('laporan_yuuki', JSON.stringify(dataLaporan));
+      renderLaporan();
+      if (typeof renderChart === 'function') renderChart();
+    }
+  };
+  laporanList.appendChild(btnKosongkanLap);
+
   [...dataLaporan].reverse().forEach(lap => {
+    // Proses Penjumlahan Total Keseluruhan
+    grandJual += lap.totalJual;
+    grandModal += lap.totalModal;
+    grandLaba += lap.totalLaba;
+
     const lapCard = document.createElement('div');
     lapCard.classList.add('trx-card');
     lapCard.innerHTML = `
@@ -284,6 +327,11 @@ function renderLaporan() {
         `;
     laporanList.appendChild(lapCard);
   });
+
+  // Menampilkan Total Keseluruhan ke Layar
+  if (elGrandJual) elGrandJual.textContent = formatRupiah(grandJual);
+  if (elGrandModal) elGrandModal.textContent = formatRupiah(grandModal);
+  if (elGrandLaba) elGrandLaba.textContent = formatRupiah(grandLaba);
 }
 
 // ==========================================
@@ -349,6 +397,17 @@ function renderHTMLRiwayatProduk(riwayatArray) {
   return html;
 }
 
+// FITUR BARU: Hapus Riwayat Produk
+window.resetRiwayatProduk = function (id) {
+  if (confirm("Yakin ingin MENGHAPUS / MERESET seluruh catatan riwayat pada produk ini?")) {
+    const idx = dataProduk.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      dataProduk[idx].riwayat = [];
+      simpanDataProduk();
+    }
+  }
+}
+
 function renderDaftarProdukKategori(kategoriTujuan) {
   const list = document.getElementById('produkList');
   if (!list) return;
@@ -385,7 +444,10 @@ function renderDaftarProdukKategori(kategoriTujuan) {
                     ${iconHistory} Catatan Riwayat & Stok <svg id="icon-riwayat-prod-${prod.id}" width="16" height="16" style="transition: transform 0.3s ease; margin-left: auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </button>
             </div>
-            <div id="riwayat-prod-${prod.id}" class="prod-history" style="display: none; margin-top: 12px; text-align: left; background-color: var(--bg-color); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">${renderHTMLRiwayatProduk(prod.riwayat)}</div>
+            <div id="riwayat-prod-${prod.id}" class="prod-history" style="display: none; margin-top: 12px; text-align: left; background-color: var(--bg-color); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
+                ${renderHTMLRiwayatProduk(prod.riwayat)}
+                ${prod.riwayat.length > 0 ? `<button onclick="resetRiwayatProduk(${prod.id})" style="width:100%; margin-top:12px; padding:10px; border:1px dashed rgba(255,59,48,0.5); color:#ff3b30; background:transparent; border-radius:6px; cursor:pointer; font-weight:bold; font-family:'Space Grotesk', sans-serif;">🗑️ Reset / Bersihkan Riwayat</button>` : ''}
+            </div>
         `;
     list.appendChild(prodCard);
   });
@@ -731,7 +793,7 @@ if (btnTransaksiBaru) {
         if (dataProduk[prodIndex].stok < qty) return alert(`Gagal! Sisa stok hanya ${dataProduk[prodIndex].stok}.`);
 
         dataProduk[prodIndex].stok -= qty;
-        linkedProductId = dataProduk[prodIndex].id; // Tandai bahwa transaksi ini memotong stok ID ini
+        linkedProductId = dataProduk[prodIndex].id;
         const w = getWaktuSekarang();
         dataProduk[prodIndex].riwayat.unshift({
           id: Date.now(), tanggal: w.tgl, jam: w.jam,
@@ -747,8 +809,8 @@ if (btnTransaksiBaru) {
       tanggal: now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }),
       jam: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'),
       status: 'normal',
-      productId: linkedProductId, // Disimpan ke riwayat agar bisa di-refund jika dihapus
-      qty: qty // Ingat berapa jumlahnya
+      productId: linkedProductId,
+      qty: qty
     };
     dataTransaksi.push(trxBaru); simpanData(); tutupModal('transactionModal');
 
@@ -761,23 +823,20 @@ let idYangAkanDihapus = null;
 window.hapusTransaksi = function (id) { idYangAkanDihapus = id; document.getElementById('modalHapus').classList.add('active'); }
 window.konfirmasiHapus = function () {
   if (idYangAkanDihapus !== null) {
-    // CEK APAKAH TRANSAKSI INI MENGGUNAKAN STOK KATALOG (FITUR REFUND STOK)
     const trx = dataTransaksi.find(t => t.id === idYangAkanDihapus);
     if (trx && trx.productId) {
       const prodIndex = dataProduk.findIndex(p => p.id === trx.productId);
       if (prodIndex !== -1) {
-        dataProduk[prodIndex].stok += (trx.qty || 1); // Kembalikan stoknya
+        dataProduk[prodIndex].stok += (trx.qty || 1);
         const w = getWaktuSekarang();
         dataProduk[prodIndex].riwayat.unshift({
           id: Date.now(), tanggal: w.tgl, jam: w.jam,
           aksi: `Trans. Dihapus, stok kembali: <span style="color:var(--stabilo-green);">+${trx.qty || 1}</span> (Sisa: ${dataProduk[prodIndex].stok})`
         });
         localStorage.setItem('produk_yuuki', JSON.stringify(dataProduk));
-        if (typeof renderProdukUI === 'function') renderProdukUI(); // Refresh katalog
+        if (typeof renderProdukUI === 'function') renderProdukUI();
       }
     }
-
-    // Baru Hapus Transaksinya
     dataTransaksi = dataTransaksi.filter(t => t.id !== idYangAkanDihapus);
     simpanData();
     idYangAkanDihapus = null;
@@ -821,7 +880,6 @@ window.prosesEkspor = function () {
   const w = getWaktuSekarang();
   const waktuEkspor = w.tgl + ' • ' + w.jam;
 
-  // Tarik SEMUA data yang belum diekspor
   if (dataTransaksi.length === 0) { alert('Data kosong. Belum ada transaksi.'); tutupModal('modalEkspor'); return; }
 
   let totalModal = 0, totalJual = 0, totalLaba = 0;
@@ -832,11 +890,11 @@ window.prosesEkspor = function () {
     tanggalTransaksi: w.tgl,
     waktuEkspor: waktuEkspor,
     totalModal, totalJual, totalLaba,
-    detailTransaksi: [...dataTransaksi] // Copy semua transaksi ke laporan
+    detailTransaksi: [...dataTransaksi]
   });
 
   localStorage.setItem('laporan_yuuki', JSON.stringify(dataLaporan));
-  dataTransaksi = []; // Kosongkan layar utama karena sudah masuk riwayat laporan
+  dataTransaksi = [];
   simpanData();
   tutupModal('modalEkspor'); window.location.href = 'laporan.html';
 }
