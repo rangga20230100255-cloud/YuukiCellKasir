@@ -135,12 +135,11 @@ window.renderChart = function () {
 
   let profitByDate = {};
   dataLaporan.forEach(lap => {
-    // Ambil data totalLaba dari laporan, kumpulkan berdasarkan tanggal
     profitByDate[lap.tanggalTransaksi] = (profitByDate[lap.tanggalTransaksi] || 0) + lap.totalLaba;
   });
 
   let labels = Object.keys(profitByDate);
-  if (labels.length > 30) labels = labels.slice(labels.length - 30); // Batas 30 hari
+  if (labels.length > 30) labels = labels.slice(labels.length - 30);
 
   let displayLabels = labels.map(label => label.includes(',') ? label.split(',')[1].trim().replace(/ \d{4}$/, '') : label);
   let dataPoints = labels.map(date => profitByDate[date]);
@@ -165,7 +164,15 @@ window.renderChart = function () {
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (context) { return formatRupiah(context.raw); } } } },
       scales: {
         y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { family: 'Space Grotesk' }, precision: 0, callback: function (value) { return 'Rp ' + value.toLocaleString('id-ID'); } } },
-        x: { grid: { display: false }, ticks: { color: textColor, font: { family: 'Space Grotesk' } } }
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: textColor,
+            font: { family: 'Space Grotesk' },
+            autoSkip: true,
+            maxTicksLimit: 8
+          }
+        }
       }
     }
   });
@@ -175,7 +182,7 @@ window.renderChart = function () {
 }
 
 // ==========================================
-// 6. MANAJEMEN DATA TRANSAKSI & LAPORAN
+// 6. MANAJEMEN DATA TRANSAKSI & LAPORAN 
 // ==========================================
 window.toggleRiwayat = function (id) {
   const detailDiv = document.getElementById('riwayat-detail-' + id);
@@ -188,29 +195,67 @@ window.toggleRiwayat = function (id) {
 
 function renderDaftarTransaksi() {
   const transactionList = document.getElementById('transactionList');
+  const elRunPenjualan = document.getElementById('runTotalPenjualan');
+  const elRunModal = document.getElementById('runTotalModal');
+  const elRunLaba = document.getElementById('runTotalLaba');
+
   if (!transactionList) return;
   transactionList.innerHTML = '';
 
+  let runPenjualan = 0, runModal = 0, runLaba = 0;
+
   if (dataTransaksi.length === 0) {
     transactionList.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Belum ada transaksi.</p>`;
+    if (elRunPenjualan) elRunPenjualan.textContent = 'Rp 0';
+    if (elRunModal) elRunModal.textContent = 'Rp 0';
+    if (elRunLaba) elRunLaba.textContent = 'Rp 0';
     return;
   }
 
-  // TOMBOL HAPUS SEMUA TRANSAKSI OTOMATIS
   const btnKosongkan = document.createElement('button');
   btnKosongkan.className = 'menu-btn outline-btn';
   btnKosongkan.style.cssText = 'width: 100%; flex-direction: row; justify-content: center; gap: 8px; padding: 12px; color: #ff3b30; border-color: rgba(255, 59, 48, 0.3); margin-bottom: 16px; border-radius: 8px; font-weight: bold; cursor: pointer;';
   btnKosongkan.innerHTML = `<svg style="width:18px; height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Hapus Semua Transaksi`;
   btnKosongkan.onclick = () => {
     if (confirm("PERINGATAN: Yakin ingin menghapus seluruh transaksi yang belum diekspor? Data akan hilang permanen!")) {
+      dataTransaksi.forEach(trx => {
+        if (trx.productId) {
+          const prodIndex = dataProduk.findIndex(p => p.id === trx.productId);
+          if (prodIndex !== -1) {
+            dataProduk[prodIndex].stok += (trx.qty || 1);
+            const w = getWaktuSekarang();
+            dataProduk[prodIndex].riwayat.unshift({
+              id: Date.now() + Math.random(), tanggal: w.tgl, jam: w.jam,
+              aksi: `Penghapusan Massal, stok kembali: <span style="color:var(--stabilo-green);">+${trx.qty || 1}</span>`
+            });
+          }
+        }
+      });
+      localStorage.setItem('produk_yuuki', JSON.stringify(dataProduk));
       dataTransaksi = [];
       simpanData();
+      if (typeof renderProdukUI === 'function') renderProdukUI();
     }
   };
   transactionList.appendChild(btnKosongkan);
 
+  let currentDate = '';
+
   [...dataTransaksi].reverse().forEach(trx => {
     const keuntungan = trx.hargaJual - trx.hargaBeli;
+
+    runPenjualan += trx.hargaJual;
+    runModal += trx.hargaBeli;
+    runLaba += keuntungan;
+
+    if (trx.tanggal !== currentDate) {
+      const dateHeader = document.createElement('div');
+      dateHeader.style.cssText = 'margin: 24px 0 12px 0; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;';
+      dateHeader.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ${trx.tanggal}`;
+      transactionList.appendChild(dateHeader);
+      currentDate = trx.tanggal;
+    }
+
     const trxCard = document.createElement('div');
     trxCard.classList.add('trx-card');
 
@@ -234,7 +279,7 @@ function renderDaftarTransaksi() {
                     ${badgeStatus}
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span class="trx-date" style="font-size: 0.75rem;">${trx.tanggal} • ${trx.jam}</span>
+                    <span class="trx-date" style="font-size: 0.75rem;">Jam ${trx.jam}</span>
                     <svg id="icon-riwayat-toggle-${trx.id}" style="transition: transform 0.3s ease; color: var(--text-main);" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
             </div>
@@ -254,6 +299,10 @@ function renderDaftarTransaksi() {
         `;
     transactionList.appendChild(trxCard);
   });
+
+  if (elRunPenjualan) elRunPenjualan.textContent = formatRupiah(runPenjualan);
+  if (elRunModal) elRunModal.textContent = formatRupiah(runModal);
+  if (elRunLaba) elRunLaba.textContent = formatRupiah(runLaba);
 }
 
 window.toggleLaporan = function (id) {
@@ -265,7 +314,6 @@ window.toggleLaporan = function (id) {
   }
 }
 
-// PERBAIKAN: Fungsi Laporan agar nilai Total Keseluruhan tidak Rp 0
 function renderLaporan() {
   const laporanList = document.getElementById('laporanList');
   const elGrandJual = document.getElementById('grandTotalJual');
@@ -284,7 +332,6 @@ function renderLaporan() {
     return;
   }
 
-  // TOMBOL HAPUS SEMUA LAPORAN OTOMATIS
   const btnKosongkanLap = document.createElement('button');
   btnKosongkanLap.className = 'menu-btn outline-btn';
   btnKosongkanLap.style.cssText = 'width: 100%; flex-direction: row; justify-content: center; gap: 8px; padding: 12px; color: #ff3b30; border-color: rgba(255, 59, 48, 0.3); margin-bottom: 16px; border-radius: 8px; font-weight: bold; cursor: pointer;';
@@ -299,8 +346,7 @@ function renderLaporan() {
   };
   laporanList.appendChild(btnKosongkanLap);
 
-  [...dataLaporan].reverse().forEach(lap => {
-    // Proses Penjumlahan Total Keseluruhan
+  dataLaporan.forEach(lap => {
     grandJual += lap.totalJual;
     grandModal += lap.totalModal;
     grandLaba += lap.totalLaba;
@@ -328,14 +374,13 @@ function renderLaporan() {
     laporanList.appendChild(lapCard);
   });
 
-  // Menampilkan Total Keseluruhan ke Layar
   if (elGrandJual) elGrandJual.textContent = formatRupiah(grandJual);
   if (elGrandModal) elGrandModal.textContent = formatRupiah(grandModal);
   if (elGrandLaba) elGrandLaba.textContent = formatRupiah(grandLaba);
 }
 
 // ==========================================
-// 7. MANAJEMEN KATALOG & STOK PRODUK
+// 7. MANAJEMEN KATALOG & STOK
 // ==========================================
 let currentKategoriView = null;
 
@@ -397,13 +442,23 @@ function renderHTMLRiwayatProduk(riwayatArray) {
   return html;
 }
 
-// FITUR BARU: Hapus Riwayat Produk
 window.resetRiwayatProduk = function (id) {
   if (confirm("Yakin ingin MENGHAPUS / MERESET seluruh catatan riwayat pada produk ini?")) {
     const idx = dataProduk.findIndex(p => p.id === id);
-    if (idx !== -1) {
-      dataProduk[idx].riwayat = [];
-      simpanDataProduk();
+    if (idx !== -1) { dataProduk[idx].riwayat = []; simpanDataProduk(); }
+  }
+}
+
+window.toggleDetailStok = function (id) {
+  const contentBox = document.getElementById(`prod-detail-content-${id}`);
+  const arrowIcon = document.getElementById(`triangle-icon-${id}`);
+  if (contentBox && arrowIcon) {
+    if (contentBox.style.display === 'none') {
+      contentBox.style.display = 'block';
+      arrowIcon.style.transform = 'rotate(90deg)';
+    } else {
+      contentBox.style.display = 'none';
+      arrowIcon.style.transform = 'rotate(0deg)';
     }
   }
 }
@@ -418,35 +473,53 @@ function renderDaftarProdukKategori(kategoriTujuan) {
   if (filtered.length === 0) { list.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">Keranjang kosong.</p>`; return; }
 
   filtered.forEach(prod => {
+    const untungPerPcs = prod.hargaJual - prod.hargaBeli;
     const prodCard = document.createElement('div');
     prodCard.classList.add('trx-card');
+
     prodCard.innerHTML = `
-            <div class="trx-header" style="align-items: flex-start; border-bottom: none; padding-bottom: 0;">
-                <div><span class="trx-name" style="font-size: 1.15rem; color: var(--text-main);">${prod.nama}</span></div>
-                <div style="text-align: right;"><p style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin:0;">Sisa Stok</p><h4 style="color: var(--stabilo-green); font-size: 1.5rem; line-height: 1;">${prod.stok}</h4></div>
+            <div class="trx-header" style="align-items: center; border-bottom: none; padding-bottom: 0; cursor: pointer;" onclick="toggleDetailStok(${prod.id})">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="triangle-icon-${prod.id}" style="transition: transform 0.2s ease; display: inline-block; font-size: 0.85rem; color: var(--stabilo-green);">▶</span>
+                    <span class="trx-name" style="font-size: 1.15rem; color: var(--text-main); font-weight: 700;">${prod.nama}</span>
+                </div>
+                <div style="text-align: right;">
+                    <p style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; margin:0;">Stok</p>
+                    <h4 style="color: var(--stabilo-green); font-size: 1.3rem; line-height: 1; margin: 0;">${prod.stok}</h4>
+                </div>
             </div>
-            <div class="trx-details" style="margin-top: 12px;">
-                <div class="trx-detail-item"><p>Harga Modal Satuan</p><h4>${formatRupiah(prod.hargaBeli)}</h4></div>
-                <div class="trx-detail-item"><p>Harga Jual Satuan</p><h4>${formatRupiah(prod.hargaJual)}</h4></div>
-            </div>
-            <div class="trx-details" style="margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
-                <div class="trx-detail-item"><p>Total Modal Stok</p><h4>${formatRupiah(prod.hargaBeli * prod.stok)}</h4></div>
-                <div class="trx-detail-item"><p>Total Jual Stok</p><h4 style="color:var(--stabilo-green);">${formatRupiah(prod.hargaJual * prod.stok)}</h4></div>
-            </div>
-            <div class="trx-actions" style="grid-template-columns: 1fr 1fr; margin-top: 16px;">
-                <button class="action-btn" onclick="bukaModalTambahStok(${prod.id})" style="border-color: rgba(57,255,20,0.3); color: var(--stabilo-green);">${iconPlus} Tambah Stok</button>
-                <button class="action-btn" onclick="bukaModalKurangStok(${prod.id})" style="border-color: rgba(255,159,10,0.3); color: #ff9f0a;">${iconMinus} Kurangi Stok</button>
-                <button class="action-btn" onclick="bukaModalEditProduk(${prod.id})">${iconEdit} Edit Info</button>
-                <button class="action-btn btn-hapus" onclick="hapusProduk(${prod.id})">${iconDelete} Hapus</button>
-            </div>
-            <div style="margin-top: 12px; text-align: center;">
-                <button class="action-btn" style="width: 100%; justify-content: center; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); padding: 10px; border-radius: 8px;" onclick="toggleRiwayatProd(${prod.id})">
-                    ${iconHistory} Catatan Riwayat & Stok <svg id="icon-riwayat-prod-${prod.id}" width="16" height="16" style="transition: transform 0.3s ease; margin-left: auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-            </div>
-            <div id="riwayat-prod-${prod.id}" class="prod-history" style="display: none; margin-top: 12px; text-align: left; background-color: var(--bg-color); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
-                ${renderHTMLRiwayatProduk(prod.riwayat)}
-                ${prod.riwayat.length > 0 ? `<button onclick="resetRiwayatProduk(${prod.id})" style="width:100%; margin-top:12px; padding:10px; border:1px dashed rgba(255,59,48,0.5); color:#ff3b30; background:transparent; border-radius:6px; cursor:pointer; font-weight:bold; font-family:'Space Grotesk', sans-serif;">🗑️ Reset / Bersihkan Riwayat</button>` : ''}
+            
+            <div id="prod-detail-content-${prod.id}" style="display: none; margin-top: 12px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
+                <div class="trx-details">
+                    <div class="trx-detail-item"><p>Harga Modal Satuan</p><h4>${formatRupiah(prod.hargaBeli)}</h4></div>
+                    <div class="trx-detail-item"><p>Harga Jual Satuan</p><h4>${formatRupiah(prod.hargaJual)}</h4></div>
+                </div>
+                
+                <div style="margin-top: 8px; margin-bottom: 8px; background: rgba(57, 255, 20, 0.05); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(57, 255, 20, 0.15); display: flex; justify-content: space-between; align-items: center;">
+                    <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted);">Keuntungan per Pcs</p>
+                    <h4 style="margin: 0; color: var(--stabilo-green); font-size: 0.95rem; font-weight: bold;">+ ${formatRupiah(untungPerPcs)}</h4>
+                </div>
+                
+                <div class="trx-details" style="margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+                    <div class="trx-detail-item"><p>Total Modal Stok</p><h4>${formatRupiah(prod.hargaBeli * prod.stok)}</h4></div>
+                    <div class="trx-detail-item"><p>Total Jual Stok</p><h4 style="color:var(--stabilo-green);">${formatRupiah(prod.hargaJual * prod.stok)}</h4></div>
+                </div>
+                
+                <div class="trx-actions" style="grid-template-columns: 1fr 1fr; margin-top: 16px;">
+                    <button class="action-btn" onclick="bukaModalTambahStok(${prod.id})" style="border-color: rgba(57,255,20,0.3); color: var(--stabilo-green);">${iconPlus} Tambah Stok</button>
+                    <button class="action-btn" onclick="bukaModalKurangStok(${prod.id})" style="border-color: rgba(255,159,10,0.3); color: #ff9f0a;">${iconMinus} Kurangi Stok</button>
+                    <button class="action-btn" onclick="bukaModalEditProduk(${prod.id})">${iconEdit} Edit Info</button>
+                    <button class="action-btn btn-hapus" onclick="hapusProduk(${prod.id})">${iconDelete} Hapus</button>
+                </div>
+                <div style="margin-top: 12px; text-align: center;">
+                    <button class="action-btn" style="width: 100%; justify-content: center; background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); padding: 10px; border-radius: 8px;" onclick="toggleRiwayatProd(${prod.id})">
+                        ${iconHistory} Catatan Riwayat & Stok <svg id="icon-riwayat-prod-${prod.id}" width="16" height="16" style="transition: transform 0.3s ease; margin-left: auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                </div>
+                <div id="riwayat-prod-${prod.id}" class="prod-history" style="display: none; margin-top: 12px; text-align: left; background-color: var(--bg-color); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color);">
+                    ${renderHTMLRiwayatProduk(prod.riwayat)}
+                    ${prod.riwayat.length > 0 ? `<button onclick="resetRiwayatProduk(${prod.id})" style="width:100%; margin-top:12px; padding:10px; border:1px dashed rgba(255,59,48,0.5); color:#ff3b30; background:transparent; border-radius:6px; cursor:pointer; font-weight:bold; font-family:'Space Grotesk', sans-serif;">🗑️ Reset / Bersihkan Riwayat</button>` : ''}
+                </div>
             </div>
         `;
     list.appendChild(prodCard);
@@ -718,13 +791,25 @@ function updateLayarKalkulator() {
 }
 
 // ==========================================
-// 10. OPERASI KASIR TERINTEGRASI KATALOG & REFUND
+// 10. LOGIKA TRANSAKSI: SENSOR HARGA DASAR KASIR
 // ==========================================
 function simpanData() { localStorage.setItem('riwayat_yuuki', JSON.stringify(dataTransaksi)); renderDaftarTransaksi(); updateDashboard(); if (typeof renderChart === 'function') renderChart(); }
 function tutupModal(idModal) { const m = document.getElementById(idModal); if (m) m.classList.remove('active'); }
 
 let tempHargaBeliSatuan = 0;
 let tempHargaJualSatuan = 0;
+
+// FITUR BARU: Sensor otomatis membaca ketikan manual user untuk dijadikan Base Price
+window.updateBasePriceManual = function () {
+  let currentQty = parseInt(document.getElementById('inputQty').value);
+  if (isNaN(currentQty) || currentQty < 1) currentQty = 1;
+
+  let valBeli = parseInt(document.getElementById('inputBeli').value) || 0;
+  let valJual = parseInt(document.getElementById('inputJual').value) || 0;
+
+  tempHargaBeliSatuan = valBeli / currentQty;
+  tempHargaJualSatuan = valJual / currentQty;
+}
 
 window.autoFillTransaksi = function () {
   const selectId = document.getElementById('selectProduk').value;
@@ -747,17 +832,42 @@ window.autoFillTransaksi = function () {
   }
 }
 
+// FITUR BARU: Perkalian yang 100% selalu bekerja, baik saat diklik maupun diketik
 window.kalkulasiTotalTransaksi = function () {
-  const qty = parseInt(document.getElementById('inputQty').value) || 1;
-  if (document.getElementById('selectProduk') && document.getElementById('selectProduk').value) {
-    document.getElementById('inputBeli').value = tempHargaBeliSatuan * qty;
-    document.getElementById('inputJual').value = tempHargaJualSatuan * qty;
+  let qtyRaw = document.getElementById('inputQty').value;
+  let qty = parseInt(qtyRaw);
+
+  // Jangan reset harga jika inputan dihapus (sedang mengetik backspace)
+  if (isNaN(qty) || qty < 1) return;
+
+  // Selalu kalikan Base Price dengan jumlah, apa pun kondisinya
+  document.getElementById('inputBeli').value = Math.round(tempHargaBeliSatuan * qty);
+  document.getElementById('inputJual').value = Math.round(tempHargaJualSatuan * qty);
+}
+
+// FITUR BARU: Tombol Plus Minus Kustom
+window.tambahQtyKasir = function () {
+  const input = document.getElementById('inputQty');
+  let val = parseInt(input.value) || 0;
+  input.value = val + 1;
+  kalkulasiTotalTransaksi();
+}
+
+window.kurangQtyKasir = function () {
+  const input = document.getElementById('inputQty');
+  let val = parseInt(input.value) || 0;
+  if (val > 1) {
+    input.value = val - 1;
+    kalkulasiTotalTransaksi();
   }
 }
 
 const btnTransaksiBaru = document.getElementById('btnTransaksiBaru');
 if (btnTransaksiBaru) {
   btnTransaksiBaru.addEventListener('click', () => {
+    const tglInput = document.getElementById('inputTanggalTrx');
+    if (tglInput) tglInput.value = new Date().toISOString().split('T')[0];
+
     const select = document.getElementById('selectProduk');
     if (select) {
       select.innerHTML = '<option value="" style="background-color: var(--bg-color); color: var(--text-main);">-- Ketik Manual / Pilih Produk --</option>';
@@ -785,13 +895,21 @@ if (btnTransaksiBaru) {
     const beli = parseInt(document.getElementById('inputBeli').value) || 0;
     const jual = parseInt(document.getElementById('inputJual').value) || 0;
 
+    const tglRaw = document.getElementById('inputTanggalTrx') ? document.getElementById('inputTanggalTrx').value : '';
+    let tglStr = '';
+    if (tglRaw) {
+      const tObj = new Date(tglRaw);
+      tglStr = tObj.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+    } else {
+      tglStr = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
     let linkedProductId = null;
 
     if (selectVal) {
       const prodIndex = dataProduk.findIndex(p => p.id === parseInt(selectVal));
       if (prodIndex !== -1) {
         if (dataProduk[prodIndex].stok < qty) return alert(`Gagal! Sisa stok hanya ${dataProduk[prodIndex].stok}.`);
-
         dataProduk[prodIndex].stok -= qty;
         linkedProductId = dataProduk[prodIndex].id;
         const w = getWaktuSekarang();
@@ -803,17 +921,13 @@ if (btnTransaksiBaru) {
       }
     }
 
-    const now = new Date();
     const trxBaru = {
       id: Date.now(), nama: nama, hargaBeli: beli, hargaJual: jual,
-      tanggal: now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }),
-      jam: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'),
-      status: 'normal',
-      productId: linkedProductId,
-      qty: qty
+      tanggal: tglStr,
+      jam: String(new Date().getHours()).padStart(2, '0') + ':' + String(new Date().getMinutes()).padStart(2, '0'),
+      status: 'normal', productId: linkedProductId, qty: qty
     };
     dataTransaksi.push(trxBaru); simpanData(); tutupModal('transactionModal');
-
     document.getElementById('inputNama').value = ''; document.getElementById('inputBeli').value = ''; document.getElementById('inputJual').value = '';
     if (document.getElementById('selectProduk')) document.getElementById('selectProduk').value = '';
   });
@@ -838,9 +952,7 @@ window.konfirmasiHapus = function () {
       }
     }
     dataTransaksi = dataTransaksi.filter(t => t.id !== idYangAkanDihapus);
-    simpanData();
-    idYangAkanDihapus = null;
-    tutupModal('modalHapus');
+    simpanData(); idYangAkanDihapus = null; tutupModal('modalHapus');
   }
 }
 
@@ -879,38 +991,54 @@ window.bukaModalEkspor = function () { document.getElementById('modalEkspor').cl
 window.prosesEkspor = function () {
   const w = getWaktuSekarang();
   const waktuEkspor = w.tgl + ' • ' + w.jam;
-
   if (dataTransaksi.length === 0) { alert('Data kosong. Belum ada transaksi.'); tutupModal('modalEkspor'); return; }
-
   let totalModal = 0, totalJual = 0, totalLaba = 0;
   dataTransaksi.forEach(trx => { totalModal += trx.hargaBeli; totalJual += trx.hargaJual; totalLaba += (trx.hargaJual - trx.hargaBeli); });
-
-  dataLaporan.push({
-    id: Date.now(),
-    tanggalTransaksi: w.tgl,
-    waktuEkspor: waktuEkspor,
-    totalModal, totalJual, totalLaba,
-    detailTransaksi: [...dataTransaksi]
-  });
-
+  dataLaporan.push({ id: Date.now(), tanggalTransaksi: w.tgl, waktuEkspor: waktuEkspor, totalModal, totalJual, totalLaba, detailTransaksi: [...dataTransaksi] });
   localStorage.setItem('laporan_yuuki', JSON.stringify(dataLaporan));
   dataTransaksi = [];
-  simpanData();
-  tutupModal('modalEkspor'); window.location.href = 'laporan.html';
+  simpanData(); tutupModal('modalEkspor'); window.location.href = 'laporan.html';
 }
 
 window.bukaModalDownload = function (id) { document.getElementById('downloadLaporanId').value = id; document.getElementById('modalDownloadLaporan').classList.add('active'); }
 window.konfirmasiDownloadLaporan = function () {
   const id = parseInt(document.getElementById('downloadLaporanId').value), lap = dataLaporan.find(l => l.id === id);
   if (lap) {
-    let tableHTML = `<table border="1"><thead><tr><th>ID</th><th>Tgl Transaksi</th><th>Jam Transaksi</th><th>Nama Barang</th><th>Modal</th><th>Harga Jual</th><th>Untung</th><th>Status</th></tr></thead><tbody>`;
-    lap.detailTransaksi.forEach(trx => { tableHTML += `<tr><td>${trx.id}</td><td>${trx.tanggal}</td><td>${trx.jam}</td><td>${trx.nama}</td><td>${trx.hargaBeli}</td><td>${trx.hargaJual}</td><td>${trx.hargaJual - trx.hargaBeli}</td><td>${trx.status}</td></tr>`; });
+    let tableHTML = `<table border="1">
+            <thead>
+                <tr>
+                    <th style="background-color:#39FF14;">ID</th>
+                    <th style="background-color:#39FF14;">Tgl Transaksi Asli</th>
+                    <th style="background-color:#39FF14;">Jam Transaksi</th>
+                    <th style="background-color:#39FF14;">Nama Barang</th>
+                    <th style="background-color:#39FF14;">Modal</th>
+                    <th style="background-color:#39FF14;">Harga Jual</th>
+                    <th style="background-color:#39FF14;">Untung</th>
+                    <th style="background-color:#39FF14;">Status</th>
+                    <th style="background-color:#39FF14;">Tgl & Waktu Diekspor</th>
+                </tr>
+            </thead>
+            <tbody>`;
+    lap.detailTransaksi.forEach(trx => {
+      tableHTML += `<tr>
+                <td>${trx.id}</td>
+                <td>${trx.tanggal}</td>
+                <td>${trx.jam}</td>
+                <td>${trx.nama}</td>
+                <td>${trx.hargaBeli}</td>
+                <td>${trx.hargaJual}</td>
+                <td>${trx.hargaJual - trx.hargaBeli}</td>
+                <td>${trx.status}</td>
+                <td>${lap.waktuEkspor}</td>
+            </tr>`;
+    });
     tableHTML += `</tbody></table>`;
     const blob = new Blob([tableHTML], { type: 'application/vnd.ms-excel' }), url = URL.createObjectURL(blob), a = document.createElement('a');
     a.href = url; a.download = `Laporan_Ekspor_${lap.tanggalTransaksi.replace(/ /g, '_')}.xls`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
   }
   tutupModal('modalDownloadLaporan');
 }
+
 let idLaporanYangAkanDihapus = null;
 window.hapusLaporan = function (id) { idLaporanYangAkanDihapus = id; document.getElementById('modalHapusLaporan').classList.add('active'); }
 window.konfirmasiHapusLaporan = function () {

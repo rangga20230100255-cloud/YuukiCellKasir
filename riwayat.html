@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Riwayat - Yuuki Cell Kasir</title>
+  <title>Riwayat Transaksi - Yuuki Cell Kasir</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -21,7 +21,7 @@
           </svg>
         </a>
         <h1>Riwayat</h1>
-        <button id="themeToggle" class="icon-btn theme-btn" aria-label="Toggle Dark Mode">
+        <button id="themeToggle" class="icon-btn" aria-label="Toggle Dark Mode">
           <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
@@ -35,57 +35,82 @@
     </header>
 
     <main class="app-content">
-      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px;">
-        <button id="btnTransaksiBaru" class="menu-btn primary-btn" style="width: 100%;">
-          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"
-            stroke-linecap="round" stroke-linejoin="round">
+
+      <!-- Tombol Tambah Dibuat Penuh (Tutup Kasir Pindah Ke Bawah) -->
+      <div style="margin-bottom: 24px;">
+        <button id="btnTransaksiBaru" class="menu-btn primary-btn" style="width: 100%; padding: 14px;">
+          <svg class="icon" style="margin: 0; width: 20px; height: 20px; margin-right: 8px;" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
-          Tambah Transaksi
+          Tambah Transaksi Baru
         </button>
+      </div>
+
+      <!-- Daftar Riwayat -->
+      <section class="transaction-history" style="margin-top: 0;">
+        <div id="transactionList" class="transaction-list">
+          <!-- Javascript akan merender transaksi di sini -->
+        </div>
+      </section>
+
+      <!-- KOTAK TOTAL TRANSAKSI BERJALAN -->
+      <div style="margin-top: 32px; border-top: 1px dashed var(--border-color); padding-top: 24px;">
+        <h3 style="text-align: center; margin-bottom: 16px; font-size: 1.1rem;">Total Transaksi Berjalan</h3>
+
+        <div
+          style="background: var(--bg-card); padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border-color);">
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0 0 4px 0; font-weight: 700;">TOTAL PENJUALAN
+          </p>
+          <h2 id="runTotalPenjualan" style="color: var(--stabilo-green); margin: 0; font-size: 1.8rem;">Rp 0</h2>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div
+            style="background: var(--bg-card); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color);">
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0 0 4px 0; font-weight: 700;">TOTAL MODAL
+            </p>
+            <h3 id="runTotalModal" style="margin: 0; color: var(--text-main);">Rp 0</h3>
+          </div>
+          <div
+            style="background: var(--bg-card); border: 1px solid var(--stabilo-green); padding: 16px; border-radius: 12px;">
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin: 0 0 4px 0; font-weight: 700;">KEUNTUNGAN
+              BERSIH</p>
+            <h3 id="runTotalLaba" style="margin: 0; color: var(--text-main);">Rp 0</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tombol Tutup Kasir Di Bawah -->
+      <div style="margin-top: 32px; margin-bottom: 32px;">
         <button onclick="bukaModalEkspor()" class="menu-btn outline-btn"
-          style="width: 100%; flex-direction: row; gap: 10px; padding: 14px; border-color: var(--border-color);">
-          <svg class="icon" style="width: 20px; height: 20px; margin: 0;" viewBox="0 0 24 24" stroke="currentColor"
-            stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          style="width: 100%; padding: 16px; border-color: var(--text-muted); color: var(--text-main);">
+          <svg class="icon" style="margin: 0; width: 20px; height: 20px; margin-right: 8px;" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
-          Ekspor Transaksi Hari Ini
+          Tutup Kasir & Ekspor Laporan
         </button>
       </div>
 
-      <section class="transaction-history" style="margin-top: 0;">
-        <h3 class="section-title">Semua Transaksi</h3>
-        <div id="transactionList" class="transaction-list">
-        </div>
-      </section>
-
-      <section style="margin-top: 40px; padding-top: 24px; border-top: 2px dashed var(--border-color);">
-        <h3 class="section-title" style="text-align: center; margin-bottom: 20px;">Total Transaksi Berjalan</h3>
-
-        <div class="summary-box sale-box" style="margin-bottom: 14px;">
-          <p style="color: #a1a1aa; font-size: 0.75rem; text-transform: uppercase;">Total Penjualan</p>
-          <h2 id="riwayatTotalJual" style="font-size: 2rem; color: var(--stabilo-green);">Rp 0</h2>
-        </div>
-
-        <div class="summary-grid">
-          <div class="summary-box capital-box">
-            <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total Modal</p>
-            <h3 id="riwayatTotalModal" style="font-size: 1.15rem; color: var(--text-main);">Rp 0</h3>
-          </div>
-          <div class="summary-box profit-box">
-            <p style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Keuntungan Bersih</p>
-            <h3 id="riwayatTotalLaba" style="font-size: 1.15rem; color: var(--text-main);">Rp 0</h3>
-          </div>
-        </div>
-      </section>
     </main>
 
+    <!-- ============================================== -->
+    <!-- KUMPULAN MODAL POPUP -->
+    <!-- ============================================== -->
+
+    <!-- MODAL TAMBAH TRANSAKSI (UI JUMLAH DIPERBAIKI) -->
     <div id="transactionModal" class="modal-overlay">
-      <div class="modal-card">
+      <div class="modal-card" style="max-height: 90vh; overflow-y: auto;">
         <h3>Tambah Transaksi</h3>
+
+        <div class="form-group">
+          <label>Tanggal Transaksi</label>
+          <input type="date" id="inputTanggalTrx">
+        </div>
 
         <div class="form-group">
           <label>Ambil dari Katalog Produk</label>
@@ -101,28 +126,38 @@
           <input type="text" id="inputNama" placeholder="Contoh: Aksesoris HP" autocomplete="off">
         </div>
 
+        <!-- DESAIN BARU: TOMBOL TAMBAH KURANG + BISA KETIK MANUAL -->
         <div class="form-group">
           <label>Jumlah / Pcs</label>
-          <input type="number" id="inputQty" value="1" min="1" oninput="kalkulasiTotalTransaksi()">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <button type="button" onclick="kurangQtyKasir()"
+              style="background: rgba(255, 59, 48, 0.15); color: #ff3b30; border: 1px solid #ff3b30; border-radius: 8px; width: 50px; height: 45px; font-size: 1.5rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
+            <input type="number" id="inputQty" value="1" min="1" oninput="kalkulasiTotalTransaksi()"
+              style="flex: 1; text-align: center; font-size: 1.2rem; font-weight: bold; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main);">
+            <button type="button" onclick="tambahQtyKasir()"
+              style="background: rgba(57, 255, 20, 0.15); color: var(--stabilo-green); border: 1px solid var(--stabilo-green); border-radius: 8px; width: 50px; height: 45px; font-size: 1.5rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
+          </div>
         </div>
 
         <div class="form-grid">
           <div class="form-group">
             <label>Total Harga Modal</label>
-            <input type="number" id="inputBeli" placeholder="0">
+            <input type="number" id="inputBeli" placeholder="0" oninput="updateBasePriceManual()">
           </div>
           <div class="form-group">
             <label>Total Harga Jual</label>
-            <input type="number" id="inputJual" placeholder="0">
+            <input type="number" id="inputJual" placeholder="0" oninput="updateBasePriceManual()">
           </div>
         </div>
-        <div class="modal-actions">
+
+        <div class="modal-actions" style="margin-top: 24px;">
           <button class="modal-btn cancel-btn" id="btnBatal">Batal</button>
           <button class="modal-btn submit-btn" id="btnTambah">Simpan</button>
         </div>
       </div>
     </div>
 
+    <!-- MODAL EDIT -->
     <div id="modalEdit" class="modal-overlay">
       <div class="modal-card">
         <h3>Edit Transaksi</h3>
@@ -133,7 +168,7 @@
         </div>
         <div class="form-grid">
           <div class="form-group">
-            <label>Harga Beli</label>
+            <label>Harga Modal</label>
             <input type="number" id="editBeli">
           </div>
           <div class="form-group">
@@ -148,40 +183,12 @@
       </div>
     </div>
 
-    <div id="modalHutang" class="modal-overlay">
-      <div class="modal-card">
-        <h3>Catat Hutang</h3>
-        <input type="hidden" id="hutangId">
-        <div class="form-group">
-          <label>Nama Penghutang</label>
-          <input type="text" id="inputNamaHutang" placeholder="Contoh: Budi" autocomplete="off">
-        </div>
-        <div class="modal-actions">
-          <button class="modal-btn cancel-btn" onclick="tutupModal('modalHutang')">Batal</button>
-          <button class="modal-btn submit-btn" style="background-color: #ff3b30; color: white;"
-            onclick="simpanHutang()">Catat</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="modalLunas" class="modal-overlay">
-      <div class="modal-card">
-        <h3>Pelunasan Hutang</h3>
-        <input type="hidden" id="lunasId">
-        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">Tandai hutang
-          ini sebagai Lunas?</p>
-        <div class="modal-actions">
-          <button class="modal-btn cancel-btn" onclick="tutupModal('modalLunas')">Batal</button>
-          <button class="modal-btn submit-btn" onclick="simpanLunas()">Lunas</button>
-        </div>
-      </div>
-    </div>
-
+    <!-- MODAL HAPUS -->
     <div id="modalHapus" class="modal-overlay">
       <div class="modal-card">
         <h3>Hapus Transaksi?</h3>
-        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">Yakin ingin
-          menghapus transaksi ini? Data tidak bisa dikembalikan.</p>
+        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">Data tidak bisa
+          dikembalikan. Jika produk dari katalog, stok akan dikembalikan otomatis.</p>
         <div class="modal-actions">
           <button class="modal-btn cancel-btn" onclick="tutupModal('modalHapus')">Batal</button>
           <button class="modal-btn submit-btn" style="background-color: #ff3b30; color: white;"
@@ -190,14 +197,46 @@
       </div>
     </div>
 
+    <!-- MODAL HUTANG -->
+    <div id="modalHutang" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Tandai Hutang</h3>
+        <input type="hidden" id="hutangId">
+        <div class="form-group">
+          <label>Nama Penghutang</label>
+          <input type="text" id="inputNamaHutang" placeholder="Masukkan nama..." autocomplete="off">
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalHutang')">Batal</button>
+          <button class="modal-btn submit-btn" style="background-color: #ff3b30; color: white;"
+            onclick="simpanHutang()">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL LUNAS -->
+    <div id="modalLunas" class="modal-overlay">
+      <div class="modal-card">
+        <h3>Konfirmasi Pelunasan</h3>
+        <input type="hidden" id="lunasId">
+        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">Tandai hutang
+          ini sebagai lunas?</p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel-btn" onclick="tutupModal('modalLunas')">Batal</button>
+          <button class="modal-btn submit-btn" onclick="simpanLunas()">Ya, Lunas</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EKSPOR -->
     <div id="modalEkspor" class="modal-overlay">
       <div class="modal-card">
-        <h3>Tutup Kasir Hari Ini?</h3>
-        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">Data hari ini
-          akan dipindah ke Laporan. Anda bisa mendownload file Excel-nya nanti di menu Laporan.</p>
+        <h3>Tutup Kasir & Ekspor</h3>
+        <p style="text-align: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--text-muted);">Pindahkan semua
+          transaksi ke Laporan Harian untuk di-download ke Excel?</p>
         <div class="modal-actions">
           <button class="modal-btn cancel-btn" onclick="tutupModal('modalEkspor')">Batal</button>
-          <button class="modal-btn submit-btn" onclick="prosesEkspor()">Hanya Ekspor</button>
+          <button class="modal-btn submit-btn" onclick="prosesEkspor()">Tutup Kasir</button>
         </div>
       </div>
     </div>
